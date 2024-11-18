@@ -1,0 +1,28 @@
+# Visual Studio specific
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.exe
+*.dll
+*.obj
+*.log
+*.zip
+*.vsix
+*.nupkg
+*.map
+
+# Build output
+bin/
+obj/
+Debug/
+Release/
+
+# NuGet
+*.nupkg
+packages/
+
+# Other
+*.ide
+*.DS_Store
