@@ -15,6 +15,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <cmath>
+#include <AntTweakBar.h>
 
 class TextureManager {
 public:
@@ -76,6 +77,10 @@ private:
 
 // 定义静态成员
 std::unordered_map<std::string, GLuint> TextureManager::textureCache;
+// 默认光照方向和颜色
+glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, 1.0f, 1.0f)); // 斜向下的光照方向
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
+float smoothness = 0.0f;  // 默认的 smooth 值
 
 
 class Camera {
@@ -480,7 +485,7 @@ void loadSingleModel(const std::string& path, Model& model) {
         modelName = result;
     }
 
-    std::filesystem::path texturePath = modelDirectory + "/Texture_3/" + modelName + ".png";
+    std::filesystem::path texturePath = modelDirectory + "/Texture_1/" + modelName + ".png";
     cout << texturePath << endl;
     if (std::filesystem::exists(texturePath)) {
         model.textureID = TextureManager::getTexture(texturePath.string().c_str());
@@ -712,13 +717,6 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 
 #pragma endregion SHADER_FUNCTIONS
 
-void display() {
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    // NB: Make the call to draw the geometry in the currently activated vertex buffer. This is where the GPU starts to work!
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glutSwapBuffers();
-}
 
 
 unsigned int VAO, VBO, EBO;
@@ -778,6 +776,15 @@ void renderScene() {
     // 使用着色器程序
     glUseProgram(shaderProgram_use);
 
+    GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
+    GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
+
+    // 设置默认的光照方向、光照颜色和 smooth 值
+    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
+    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
+    glUniform1f(smoothnessLoc, smoothness);
+
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
     float deltaTime = currentFrame - lastFrame;
@@ -820,19 +827,6 @@ void renderScene() {
         glDrawElements(GL_TRIANGLES, fishmodels[i].indices.size(), GL_UNSIGNED_INT, 0);
     }
 
-    //for (const auto& model : fishmodels) {
-    //    glBindVertexArray(model.VAO);
-
-    //    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    //    modelMatrix = glm::translate(modelMatrix, translation);
-    //    glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-    //    glActiveTexture(GL_TEXTURE0);
-    //    glBindTexture(GL_TEXTURE_2D, model.textureID);
-    //    glUniform1i(glGetUniformLocation(shaderProgram_use, "ourTexture"), 0);
-
-    //    glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
-    //}
 
 
     for (const auto& model : models) {
@@ -849,12 +843,10 @@ void renderScene() {
         glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
     }
 
-    //vector<std::string> faces = getAllTexFiles("C:/Users/555/Desktop/assignment/CG_Project_1/SkyBoxTexture");
-
-    //renderSkybox(skyboxShaderProgram_use, skyboxVAO, loadCubemap(faces), view, projection);
+    glBindVertexArray(0);  // 解除绑定
+    TwDraw();
 
     glutSwapBuffers();
-    // 请求重新显示，使得下次自动刷新
     glutPostRedisplay();
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
@@ -928,21 +920,94 @@ void mouseMotionCallback(int x, int y) {
     }
 }
 
+void reshape(int width, int height) {
+    glViewport(0, 0, width, height);
+    TwWindowSize(width, height);
+}
 
+void keyboard(unsigned char key, int x, int y) {
+    if (key == 27) { // Escape key
+        TwTerminate();
+        exit(0);
+    }
+    TwEventKeyboardGLUT(key, x, y);
+}
+
+void mouse(int button, int state, int x, int y) {
+    TwEventMouseButtonGLUT(button, state, x, y);
+}
+
+void motion(int x, int y) {
+    TwEventMouseMotionGLUT(x, y);
+}
+// 窗口大小
+int windowWidth = 1920;
+int windowHeight = 1080;
+
+// 初始化 OpenGL 和 AntTweakBar
+void initOpenGLAndAntTweakBar() {
+    // 初始化 AntTweakBar
+    TwInit(TW_OPENGL, NULL);
+
+    // 创建一个新的 Tweak Bar
+    TwBar* bar = TwNewBar("Settings");
+
+    // 设置 Tweak Bar 的位置和大小
+    // 将 UI 放在窗口的右下角
+    int barWidth = 200;  // Tweak Bar 的宽度
+    int barHeight = 150; // Tweak Bar 的高度
+    TwWindowSize(windowWidth, windowHeight);
+
+    // 使用临时数组设置参数
+    int position[] = { windowWidth - barWidth, windowHeight - barHeight };
+    TwSetParam(bar, NULL, "position", TW_PARAM_INT32, 2, position);
+
+    int size[] = { barWidth, barHeight };
+    TwSetParam(bar, NULL, "size", TW_PARAM_INT32, 2, size);
+
+    // 添加一个简单的按钮和一个浮点变量到 Tweak Bar
+    static float value = 0.0f;
+    TwAddVarRW(bar, "Value", TW_TYPE_FLOAT, &value, " label='Value' min=0 max=100 step=1 ");
+}
+
+void renderSceneUI() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // 渲染你的 OpenGL 场景...
+
+    // 渲染 AntTweakBar UI
+    TwDraw();
+
+    glutSwapBuffers();
+    glutPostRedisplay();
+}
 
 
 int main(int argc, char** argv) {
     std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
     // Set up the window
+
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(1920, 1080);
+    glutInitWindowSize(windowWidth, windowHeight);
     glutCreateWindow("Scene Rendering");
     // Tell glut where the display function is
-    glutDisplayFunc(display);
 
-    glewInit();
+    // 初始化 GLEW
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
     initGL();
+    initOpenGLAndAntTweakBar();
+
+    glutDisplayFunc(renderScene);
+
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
 
     InitializeFishTail();
 
@@ -950,19 +1015,10 @@ int main(int argc, char** argv) {
     std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
 
     loadFishModels(fbxfishFiles);
-    // 加载模型并设置 OpenGL 缓冲区
-    std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
-    //std::vector<std::string> fbxFiles;
-    //fbxFiles.push_back("C:/Users/555/Desktop/assignment/CG_Project_1/FBX/CoralRock1.001.fbx"); // 替换为您要测试的具体文件路径
-    loadModels(fbxFiles);
+    //// 加载模型并设置 OpenGL 缓冲区
+    //std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
+    ////loadModels(fbxFiles);
 
-    //loadModel("C:/Users/555/Desktop/assignment/CG_Project_1/textest.fbx");
-    //std::cout << "Vertices count: " << vertices.size() << std::endl;
-    //std::cout << "Indices count: " << indices.size() << std::endl;
-    //cout << shaderProgram_use;
-    ////setupMesh();
-
-    glutDisplayFunc(renderScene);
 
     glutKeyboardFunc(processNormalKeys);
     glutMouseFunc(mouseButtonCallback);       
