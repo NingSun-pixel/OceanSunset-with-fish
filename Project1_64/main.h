@@ -8,6 +8,6 @@
 //#include "FishTail.h"
 //#include "ModelLoader.h"
 #include "Skybox.h"
-//#include "UIManager.h"
+#include "MouseHandler.h"
 
 #endif // MAIN_H

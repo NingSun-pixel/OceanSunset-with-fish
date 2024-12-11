@@ -677,70 +677,32 @@ std::vector<std::string> getAllFBXFiles(const std::string& folderPath) {
 bool mousePressed = false;     // if press or not
 float lastX, lastY;            // last month position
 
+MouseHandler* mouseHandler = nullptr;
+
 //相机点击逻辑
 void processNormalKeys(unsigned char key, int x, int y) {
-    if (!TwEventKeyboardGLUT(key, x, y)) { // 如果事件未被UI处理
-        float deltaTime = 0.1f;
-        camera.processKeyboard(key, deltaTime);
-        glutPostRedisplay();
+    if (mouseHandler) {
+        mouseHandler->processKeys(key, x, y);
     }
 }
 
+int windowWidth = 1920;
+int windowHeight = 1080;
+
+
 void mouseButtonCallback(int button, int state, int x, int y) {
-    if (!TwEventMouseButtonGLUT(button, state, x, y)) { // 如果事件未被UI处理
-        if (button == GLUT_LEFT_BUTTON) {
-            if (state == GLUT_DOWN) {
-                mousePressed = true;
-                lastX = x;
-                lastY = y;
-            }
-            else if (state == GLUT_UP) {
-                mousePressed = false;
-            }
-        }
+    if (mouseHandler) {
+        mouseHandler->handleMouseButton(button, state, x, y);
     }
 }
 
 void mouseMotionCallback(int x, int y) {
-    if (!TwEventMouseMotionGLUT(x, y)) { // 如果事件未被UI处理
-        if (mousePressed) {
-            float xOffset = x - lastX;
-            float yOffset = lastY - y;
-
-            lastX = x;
-            lastY = y;
-
-            // 调整视角
-            camera.processMouseMovement(xOffset, yOffset);
-            glutPostRedisplay();
-        }
+    if (mouseHandler) {
+        mouseHandler->handleMouseMotion(x, y);
     }
 }
 
-//UI点击逻辑
-void reshape(int width, int height) {
-    glViewport(0, 0, width, height);
-    TwWindowSize(width, height);
-}
 
-void keyboard(unsigned char key, int x, int y) {
-    if (key == 27) { // Escape key
-        TwTerminate();
-        exit(0);
-    }
-    TwEventKeyboardGLUT(key, x, y);
-}
-
-void mouse(int button, int state, int x, int y) {
-    TwEventMouseButtonGLUT(button, state, x, y);
-}
-
-void motion(int x, int y) {
-    TwEventMouseMotionGLUT(x, y);
-}
-// 窗口大小
-int windowWidth = 1920;
-int windowHeight = 1080;
 
 // 初始化 OpenGL 和 AntTweakBar
 void initOpenGLAndAntTweakBar() {
@@ -810,7 +772,9 @@ int main(int argc, char** argv) {
     initOpenGLAndAntTweakBar();
 
     glutDisplayFunc(renderScene);
-
+    // 创建 MouseHandler 对象
+    MouseHandler mouseHandlerInstance(camera);
+    mouseHandler = &mouseHandlerInstance;
     //相机点击逻辑
     glutKeyboardFunc(processNormalKeys);
     glutMouseFunc(mouseButtonCallback);
