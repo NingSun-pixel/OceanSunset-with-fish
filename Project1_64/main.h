@@ -6,7 +6,7 @@
 #include "TextureManager.h"
 #include "Camera.h"
 //#include "FishTail.h"
-//#include "ModelLoader.h"
+#include "ModelLoader.h"
 #include "Skybox.h"
 #include "MouseHandler.h"
 

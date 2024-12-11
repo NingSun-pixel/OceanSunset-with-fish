@@ -212,28 +212,12 @@ unsigned int createShader(const char* vertexPath, const char* fragmentPath) {
 // 全局变量：平移矩阵
 glm::vec3 translation(0.0f, 0.0f, 0.0f);
 
-// 一个简单的结构体来存储顶点信息
-struct Vertex {
-    glm::vec3 position;
-    glm::vec3 color;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
-};
-
-//std::vector<Vertex> vertices;
-//std::vector<unsigned int> indices;
 unsigned int shaderProgram_use;
 unsigned int textureID;
 unsigned int skyboxShaderProgram_use;
 GLuint skyboxVAO;
 
 
-struct Model {
-    unsigned int VAO, VBO, EBO;
-    unsigned int textureID;
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-};
 
 struct Bone {
     std::string name;
@@ -254,173 +238,6 @@ std::vector<Model> fishmodels;
 vector<std::string> faces;
 GLuint cubemapTexture;
 
-// load single model and create for their VAO、VBO、EBO
-void loadSingleModel(const std::string& path, Model& model) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "Error: " << importer.GetErrorString() << std::endl;
-        return;
-    }
-
-    aiMesh* mesh = scene->mMeshes[0];
-
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
-        vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f, 0.0f);
-        // vertex color
-        if (mesh->mColors[0]) { // check if have vertex color
-            vertex.color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
-        }
-        else {
-            vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // no color just white
-        }
-
-        model.vertices.push_back(vertex);
-    }
-
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-        aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
-            model.indices.push_back(face.mIndices[j]);
-    }
-
-    std::filesystem::path modelFilePath(path);
-    std::string modelDirectory = modelFilePath.parent_path().parent_path().string();
-    std::string modelName = modelFilePath.stem().string();
-
-    cout << modelName << endl;
-    bool isConstTex = false;
-
-    size_t pos = modelName.find('_');
-    if (pos != std::string::npos) {
-        string result = modelName.substr(0, pos);
-        modelName = result;
-    }
-
-    std::filesystem::path texturePath = modelDirectory + "/Texture_1/" + modelName + ".png";
-    cout << texturePath << endl;
-    if (std::filesystem::exists(texturePath)) {
-        model.textureID = TextureManager::getTexture(texturePath.string().c_str());
-    }
-
-    glGenVertexArrays(1, &model.VAO);
-    glGenBuffers(1, &model.VBO);
-    glGenBuffers(1, &model.EBO);
-
-    glBindVertexArray(model.VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, model.VBO);
-    glBufferData(GL_ARRAY_BUFFER, model.vertices.size() * sizeof(Vertex), &model.vertices[0], GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indices.size() * sizeof(unsigned int), &model.indices[0], GL_STATIC_DRAW);
-
-    // vertex position -> location 0
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // vertex color -> location 1
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
-
-    // vertex normal -> location 2
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(2);
-
-    // UV -> location 3
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
-    glEnableVertexAttribArray(3);
-
-    glBindVertexArray(0);
-}
-
-
-void loadSingleFishModel(const std::string& path, Model& model) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "Error: " << importer.GetErrorString() << std::endl;
-        return;
-    }
-
-    aiMesh* mesh = scene->mMeshes[0];
-
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        Vertex vertex;
-        vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        vertex.texCoords = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f, 0.0f);
-        // vertex color
-        if (mesh->mColors[0]) { // check if have vertex color
-            vertex.color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
-        }
-        else {
-            vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // no color just white
-        }
-
-        model.vertices.push_back(vertex);
-    }
-
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-        aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
-            model.indices.push_back(face.mIndices[j]);
-    }
-
-    std::filesystem::path modelFilePath(path);
-    std::string modelDirectory = modelFilePath.parent_path().parent_path().string();
-    std::string modelName = modelFilePath.stem().string();
-
-    cout << modelName << endl;
-    bool isConstTex = false;
-
-    size_t pos = modelName.find('_');
-    if (pos != std::string::npos) {
-        string result = modelName.substr(0, pos);
-        modelName = result;
-    }
-
-    std::filesystem::path texturePath = modelDirectory + "/Texture_3/" + modelName + ".png";
-    cout << texturePath << endl;
-    if (std::filesystem::exists(texturePath)) {
-        model.textureID = TextureManager::getTexture(texturePath.string().c_str());
-    }
-
-    glGenVertexArrays(1, &model.VAO);
-    glGenBuffers(1, &model.VBO);
-    glGenBuffers(1, &model.EBO);
-
-    glBindVertexArray(model.VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, model.VBO);
-    glBufferData(GL_ARRAY_BUFFER, model.vertices.size() * sizeof(Vertex), &model.vertices[0], GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.indices.size() * sizeof(unsigned int), &model.indices[0], GL_STATIC_DRAW);
-
-    // vertex position -> location 0
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // vertex color -> location 1
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
-
-    // vertex normal -> location 2
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(2);
-
-    // UV -> location 3
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
-    glEnableVertexAttribArray(3);
-
-    glBindVertexArray(0);
-}
 
 // 加载所有模型
 void loadModels(const std::vector<std::string>& fbxFiles) {
@@ -491,16 +308,6 @@ void loadModels(const std::vector<std::string>& fbxFiles) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-}
-
-void loadFishModels(const std::vector<std::string>& fbxFiles) {
-    //先创建共享TexID
-    for (const auto& file : fbxFiles) {
-        Model model;
-        loadSingleFishModel(file, model);
-        fishmodels.push_back(model);
-    }
-
 }
 
 // Shader Functions- click on + to expand
@@ -659,21 +466,8 @@ void initGL() {
 
 }
 
-//get all FBX
-std::vector<std::string> getAllFBXFiles(const std::string& folderPath) {
-    std::vector<std::string> fbxFiles;
-
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        if (entry.path().extension() == ".fbx") {
-            fbxFiles.push_back(entry.path().string());
-        }
-    }
-
-    return fbxFiles;
-}
-
-
-
+int windowWidth = 1920;
+int windowHeight = 1080;
 bool mousePressed = false;     // if press or not
 float lastX, lastY;            // last month position
 
@@ -686,8 +480,6 @@ void processNormalKeys(unsigned char key, int x, int y) {
     }
 }
 
-int windowWidth = 1920;
-int windowHeight = 1080;
 
 
 void mouseButtonCallback(int button, int state, int x, int y) {
@@ -783,7 +575,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
 
-    loadFishModels(fbxfishFiles);
+    loadSeparateModels(fbxfishFiles,fishmodels);
     //// 加载模型并设置 OpenGL 缓冲区
     //std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
     //loadModels(fbxFiles);
