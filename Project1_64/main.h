@@ -7,7 +7,7 @@
 //#include "Camera.h"
 //#include "FishTail.h"
 //#include "ModelLoader.h"
-//#include "Skybox.h"
+#include "Skybox.h"
 //#include "UIManager.h"
 
 #endif // MAIN_H
