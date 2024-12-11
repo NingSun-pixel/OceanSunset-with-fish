@@ -1,19 +1,13 @@
-#include<assimp/Importer.hpp>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include <iostream>
 #include <glm/common.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <vector>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <fstream>
 #include <sstream>
 #include <filesystem> 
 #include <cmath>
-#include <AntTweakBar.h>
 #include "main.h"
 
 
