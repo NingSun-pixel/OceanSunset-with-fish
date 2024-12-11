@@ -525,18 +525,6 @@ void initOpenGLAndAntTweakBar() {
     TwAddVarRW(bar, "Value", TW_TYPE_FLOAT, &value, " label='Value' min=0 max=100 step=1 ");
 }
 
-void renderSceneUI() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // ‰÷»æƒ„µƒ OpenGL ≥°æ∞...
-
-    // ‰÷»æ AntTweakBar UI
-    TwDraw();
-
-    glutSwapBuffers();
-    glutPostRedisplay();
-}
-
 
 int main(int argc, char** argv) {
     std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
