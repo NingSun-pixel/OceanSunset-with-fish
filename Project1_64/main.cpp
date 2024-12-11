@@ -886,40 +886,47 @@ std::vector<std::string> getAllFBXFiles(const std::string& folderPath) {
 bool mousePressed = false;     // if press or not
 float lastX, lastY;            // last month position
 
+//相机点击逻辑
 void processNormalKeys(unsigned char key, int x, int y) {
-    float deltaTime = 0.1f;
-    camera.processKeyboard(key, deltaTime);
-    glutPostRedisplay();
-}
-
-void mouseButtonCallback(int button, int state, int x, int y) {
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            mousePressed = true;
-            lastX = x;
-            lastY = y;
-        }
-        else if (state == GLUT_UP) {
-            mousePressed = false;
-        }
-    }
-}
-
-
-void mouseMotionCallback(int x, int y) {
-    if (mousePressed) {
-        float xOffset = x - lastX;
-        float yOffset = lastY - y; 
-
-        lastX = x;
-        lastY = y;
-
-        // adapt the perpective by the movement
-        camera.processMouseMovement(xOffset, yOffset);
+    if (!TwEventKeyboardGLUT(key, x, y)) { // 如果事件未被UI处理
+        float deltaTime = 0.1f;
+        camera.processKeyboard(key, deltaTime);
         glutPostRedisplay();
     }
 }
 
+void mouseButtonCallback(int button, int state, int x, int y) {
+    if (!TwEventMouseButtonGLUT(button, state, x, y)) { // 如果事件未被UI处理
+        if (button == GLUT_LEFT_BUTTON) {
+            if (state == GLUT_DOWN) {
+                mousePressed = true;
+                lastX = x;
+                lastY = y;
+            }
+            else if (state == GLUT_UP) {
+                mousePressed = false;
+            }
+        }
+    }
+}
+
+void mouseMotionCallback(int x, int y) {
+    if (!TwEventMouseMotionGLUT(x, y)) { // 如果事件未被UI处理
+        if (mousePressed) {
+            float xOffset = x - lastX;
+            float yOffset = lastY - y;
+
+            lastX = x;
+            lastY = y;
+
+            // 调整视角
+            camera.processMouseMovement(xOffset, yOffset);
+            glutPostRedisplay();
+        }
+    }
+}
+
+//UI点击逻辑
 void reshape(int width, int height) {
     glViewport(0, 0, width, height);
     TwWindowSize(width, height);
@@ -954,9 +961,18 @@ void initOpenGLAndAntTweakBar() {
 
     // 设置 Tweak Bar 的位置和大小
     // 将 UI 放在窗口的右下角
-    int barWidth = 200;  // Tweak Bar 的宽度
-    int barHeight = 150; // Tweak Bar 的高度
+    int barWidth = 400;  // Tweak Bar 的宽度
+    int barHeight = 200; // Tweak Bar 的高度
     TwWindowSize(windowWidth, windowHeight);
+
+    // 添加光照方向变量
+    TwAddVarRW(bar, "Light Direction", TW_TYPE_DIR3F, &lightDirection[0],
+        "label='Light Direction' help='Adjust the light direction'");
+
+    // 添加光照颜色变量
+    TwAddVarRW(bar, "Light Color", TW_TYPE_COLOR3F, &lightColor[0],
+        "label='Light Color' help='Adjust the light color'");
+
 
     // 使用临时数组设置参数
     int position[] = { windowWidth - barWidth, windowHeight - barHeight };
@@ -1004,25 +1020,19 @@ int main(int argc, char** argv) {
 
     glutDisplayFunc(renderScene);
 
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouse);
-    glutMotionFunc(motion);
-
+    //相机点击逻辑
+    glutKeyboardFunc(processNormalKeys);
+    glutMouseFunc(mouseButtonCallback);
+    glutMotionFunc(mouseMotionCallback);
     InitializeFishTail();
-
 
     std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
 
     loadFishModels(fbxfishFiles);
     //// 加载模型并设置 OpenGL 缓冲区
     //std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
-    ////loadModels(fbxFiles);
+    //loadModels(fbxFiles);
 
-
-    glutKeyboardFunc(processNormalKeys);
-    glutMouseFunc(mouseButtonCallback);       
-    glutMotionFunc(mouseMotionCallback);    
     glutMainLoop(); 
     return 0;
 }
