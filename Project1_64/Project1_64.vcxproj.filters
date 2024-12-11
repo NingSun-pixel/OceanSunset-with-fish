@@ -16,10 +16,16 @@
     <Filter Include="Source Files\Shader">
       <UniqueIdentifier>{2f67a994-e829-415e-894f-7a27fdf00655}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Dependence">
+      <UniqueIdentifier>{1b6e8e38-6806-43ce-b358-9cf144e386aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Source Files\Dependence</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -35,5 +41,13 @@
     <None Include="Shader\vertex_skybox.glsl">
       <Filter>Source Files\Shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
