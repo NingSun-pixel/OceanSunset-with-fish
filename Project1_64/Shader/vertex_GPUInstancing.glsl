@@ -9,7 +9,7 @@ uniform float deltaTime;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 fragColor;
+out vec3 VertColor;
 
 void main() {
     // 更新鱼的位置
@@ -40,8 +40,9 @@ void main() {
         vec4(updatedPosition, 1.0)
     );
 
+
     mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
-    gl_Position = projection * view * modelMatrix * vec4(inPosition, 1.0);
-    fragColor = vec3(1.0, 0.5, 0.3); // 设置颜色
+    gl_Position = projection * view  * vec4(inPosition, 1.0);
+    VertColor = vec3(1.0, 0.5, 0.3); // 设置颜色
 }

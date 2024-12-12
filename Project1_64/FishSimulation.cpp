@@ -82,10 +82,11 @@ void FishSimulation::renderFish(GLuint shaderProgram) {
 
     for (const auto& model : fishModels) {
         glBindVertexArray(model.VAO);
+        //instance
         glDrawElementsInstanced(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0, instances.size());
-        glBindVertexArray(0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, model.textureID);
         glUniform1i(glGetUniformLocation(shaderProgram, "albedoMap"), 0);
+        glBindVertexArray(0);
     }
 }

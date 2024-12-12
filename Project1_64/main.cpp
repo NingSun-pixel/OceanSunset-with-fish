@@ -384,33 +384,33 @@ void renderScene() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     //sub animation
-    UpdateFishTail(currentTime); // update the tail
-    ApplyFishTailTransform();    // apply the tail animation
+    //UpdateFishTail(currentTime); // update the tail
+    //ApplyFishTailTransform();    // apply the tail animation
 
     float speed = 0.5f;  // speed
     // hierarchy (big animation)
     float translationDistance = speed * currentTime *0.1f;  // 计算平移距离
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(translationDistance, 0.0f, 0.0f));
 
-    for (int i = 0; i < fishmodels.size(); i++) {
-        glBindVertexArray(fishmodels[i].VAO);
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
-        //just the tail sub animate
-        if (i == 0)
-        {
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -i * 0.5f)); // 
-            modelMatrix *= fishTailJoints[i % fishTailJoints.size()].transform; 
-        }
-        else {
-            modelMatrix = glm::translate(modelMatrix, translation);
-        }
-        modelMatrix = translationMatrix * modelMatrix;
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, fishmodels[i].textureID);
-        glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-        glDrawElements(GL_TRIANGLES, fishmodels[i].indices.size(), GL_UNSIGNED_INT, 0);
-    }
+    //for (int i = 0; i < fishmodels.size(); i++) {
+    //    glBindVertexArray(fishmodels[i].VAO);
+    //    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    //    //just the tail sub animate
+    //    if (i == 0)
+    //    {
+    //        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -i * 0.5f)); // 
+    //        modelMatrix *= fishTailJoints[i % fishTailJoints.size()].transform; 
+    //    }
+    //    else {
+    //        modelMatrix = glm::translate(modelMatrix, translation);
+    //    }
+    //    modelMatrix = translationMatrix * modelMatrix;
+    //    glActiveTexture(GL_TEXTURE0);
+    //    glBindTexture(GL_TEXTURE_2D, fishmodels[i].textureID);
+    //    glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
+    //    glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    //    glDrawElements(GL_TRIANGLES, fishmodels[i].indices.size(), GL_UNSIGNED_INT, 0);
+    //}
 
 
 
@@ -430,8 +430,8 @@ void renderScene() {
 
     glBindVertexArray(0);  // 解除绑定
     TwDraw();
-    //fishSimulation->updateFish(deltaTime);
-    //fishSimulation->renderFish(GPUInstancingShaderProgram_use);
+    fishSimulation->updateFish(deltaTime);
+    fishSimulation->renderFish(GPUInstancingShaderProgram_use);
 
     GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
@@ -559,6 +559,12 @@ int main(int argc, char** argv) {
     }
     initGL();
     initOpenGLAndAntTweakBar();
+    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
+    FishSimulation fishSim(1000, camera);
+    fishSimulation = &fishSim;
+
+    fishSimulation->initFishInstances();
+    fishSimulation->loadFishModels(fbxfishFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象
@@ -570,9 +576,8 @@ int main(int argc, char** argv) {
     glutMotionFunc(mouseMotionCallback);
     InitializeFishTail();
 
-    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
 
-    loadSeparateModels(fbxfishFiles,fishmodels);
+    //loadSeparateModels(fbxfishFiles,fishmodels);
     //// 加载模型并设置 OpenGL 缓冲区
     //std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
     //loadModels(fbxFiles);
