@@ -16,13 +16,13 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
 
 void Camera::processKeyboard(char key, float deltaTime) {
     float velocity = 10.0f * deltaTime;
-    if (key == 'w')
+    if (key == 'w' || key == 'W')
         position += front * velocity;
-    if (key == 's')
+    if (key == 's' || key == 'S')
         position -= front * velocity;
-    if (key == 'a')
+    if (key == 'a' || key == 'A')
         position -= glm::normalize(glm::cross(front, up)) * velocity;
-    if (key == 'd')
+    if (key == 'd' || key == 'D')
         position += glm::normalize(glm::cross(front, up)) * velocity;
 
 }

@@ -113,7 +113,7 @@ void main()
 
     // 计算最终颜色
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL + albedo * 0.05;
 
     // 伽马校正
     color = color / (color + vec3(1.0));
