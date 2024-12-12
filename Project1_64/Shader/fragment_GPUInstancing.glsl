@@ -3,6 +3,7 @@
 in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
+in vec3 VertColor;
 out vec4 FragColor;
 
 // Uniforms
@@ -117,5 +118,5 @@ void main()
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
-    FragColor = vec4(1.0,1.0,1.0, 1.0);
+    FragColor = vec4(color, 1.0);
 }

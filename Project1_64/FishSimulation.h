@@ -31,6 +31,8 @@ public:
     void updateFish(float deltaTime);
     // 渲染鱼群
     void renderFish(GLuint shaderProgram);
+    void loadSingleGPUModel(const std::string& path, Model& model, FishInstance instance);
+    void loadSeparateGPUModels(const std::vector<std::string>& fbxFiles, std::vector<Model>& models, std::vector<FishInstance> instances);
 
 private:
     int numInstances;                             // 鱼群数量

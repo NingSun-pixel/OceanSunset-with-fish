@@ -342,6 +342,7 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 unsigned int VAO, VBO, EBO;
 
 
+
 //get all Tex
 std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
     std::vector<std::string> fbxFiles;
@@ -372,6 +373,7 @@ void renderScene() {
     glUseProgram(shaderProgram_use);
 
 
+
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
     float deltaTime = currentFrame - lastFrame;
@@ -391,26 +393,6 @@ void renderScene() {
     // hierarchy (big animation)
     float translationDistance = speed * currentTime *0.1f;  // º∆À„∆Ω“∆æ‡¿Î
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(translationDistance, 0.0f, 0.0f));
-
-    //for (int i = 0; i < fishmodels.size(); i++) {
-    //    glBindVertexArray(fishmodels[i].VAO);
-    //    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    //    //just the tail sub animate
-    //    if (i == 0)
-    //    {
-    //        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -i * 0.5f)); // 
-    //        modelMatrix *= fishTailJoints[i % fishTailJoints.size()].transform; 
-    //    }
-    //    else {
-    //        modelMatrix = glm::translate(modelMatrix, translation);
-    //    }
-    //    modelMatrix = translationMatrix * modelMatrix;
-    //    glActiveTexture(GL_TEXTURE0);
-    //    glBindTexture(GL_TEXTURE_2D, fishmodels[i].textureID);
-    //    glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
-    //    glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    //    glDrawElements(GL_TRIANGLES, fishmodels[i].indices.size(), GL_UNSIGNED_INT, 0);
-    //}
 
 
 
@@ -432,6 +414,8 @@ void renderScene() {
     TwDraw();
     fishSimulation->updateFish(deltaTime);
     fishSimulation->renderFish(GPUInstancingShaderProgram_use);
+
+
 
     GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
@@ -560,7 +544,7 @@ int main(int argc, char** argv) {
     initGL();
     initOpenGLAndAntTweakBar();
     std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
-    FishSimulation fishSim(1000, camera);
+    FishSimulation fishSim(10, camera);
     fishSimulation = &fishSim;
 
     fishSimulation->initFishInstances();

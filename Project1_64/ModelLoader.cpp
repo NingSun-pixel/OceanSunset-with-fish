@@ -83,6 +83,9 @@ void loadSingleModel(const std::string& path, Model& model) {
     glBindVertexArray(0);
 }
 
+
+
+
 void loadSeparateModels(const std::vector<std::string>& fbxFiles, std::vector<Model>& models) {
     for (const auto& file : fbxFiles) {
         Model model;
