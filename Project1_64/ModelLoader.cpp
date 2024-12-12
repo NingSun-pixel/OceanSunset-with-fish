@@ -105,3 +105,4 @@ std::vector<std::string> getAllFBXFiles(const std::string& folderPath) {
 
     return fbxFiles;
 }
+

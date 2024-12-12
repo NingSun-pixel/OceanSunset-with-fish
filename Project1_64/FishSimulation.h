@@ -19,27 +19,20 @@ struct FishInstance {
 
 class FishSimulation {
 public:
-    // 构造函数和析构函数
     FishSimulation(int numInstances, Camera& camera);
     ~FishSimulation();
 
-    // 初始化鱼群实例
     void initFishInstances();
-    // 加载鱼模型
-    void loadFishModels(const std::vector<std::string>& fbxFiles);
-    // 更新鱼群
+    void loadFishModel(const std::string& modelPath);
     void updateFish(float deltaTime);
-    // 渲染鱼群
     void renderFish(GLuint shaderProgram);
-    void loadSingleGPUModel(const std::string& path, Model& model, FishInstance instance);
-    void loadSeparateGPUModels(const std::vector<std::string>& fbxFiles, std::vector<Model>& models, std::vector<FishInstance> instances);
 
 private:
-    int numInstances;                             // 鱼群数量
-    std::vector<FishInstance> instances;          // 鱼实例数据
-    GLuint instanceVBO;                           // 实例化缓冲对象
-    std::vector<Model> fishModels;                // 鱼模型列表
-    Camera& camera;                               // 引用相机
+    int numInstances;
+    std::vector<FishInstance> instances;
+    GLuint instanceVBO;
+    Model fishModel;
+    Camera& camera;
 };
 
 #endif // FISH_SIMULATION_H

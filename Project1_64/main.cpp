@@ -426,14 +426,14 @@ void renderScene() {
     glUniform3fv(lightColorLoc, 1, &lightColor[0]);
     glUniform1f(smoothnessLoc, smoothness);
 
-    //GLint GPUlightDirLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightDirection");
-    //GLint GPUlightColorLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightColor");
-    //GLint GPUsmoothnessLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "smoothness");
+    GLint GPUlightDirLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightDirection");
+    GLint GPUlightColorLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightColor");
+    GLint GPUsmoothnessLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "smoothness");
 
-    //// 设置默认的光照方向、光照颜色和 smooth 值
-    //glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
-    //glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
-    //glUniform1f(GPUsmoothnessLoc, smoothness);
+    // 设置默认的光照方向、光照颜色和 smooth 值
+    glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
+    glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
+    glUniform1f(GPUsmoothnessLoc, smoothness);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -544,11 +544,12 @@ int main(int argc, char** argv) {
     initGL();
     initOpenGLAndAntTweakBar();
     std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
-    FishSimulation fishSim(10, camera);
+    FishSimulation fishSim(1000, camera);
     fishSimulation = &fishSim;
 
     fishSimulation->initFishInstances();
-    fishSimulation->loadFishModels(fbxfishFiles);
+    cout << "loadFishModels"<< endl;
+    fishSimulation->loadFishModel(fbxfishFiles[0]);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象
