@@ -5,7 +5,7 @@
 //#include "GLSetup.h"
 #include "TextureManager.h"
 #include "Camera.h"
-//#include "FishTail.h"
+#include "FishSimulation.h"
 #include "ModelLoader.h"
 #include "Skybox.h"
 #include "MouseHandler.h"

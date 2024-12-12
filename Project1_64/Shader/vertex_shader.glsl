@@ -4,6 +4,7 @@ layout(location = 1) in vec3 aColor;
 layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec2 aTexCoords;
 
+
 out vec2 TexCoords;
 out vec3 vertColor;
 out vec3 FragPos;

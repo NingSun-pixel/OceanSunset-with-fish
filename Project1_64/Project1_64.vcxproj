@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FishSimulation.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="MouseHandler.cpp" />
@@ -144,13 +145,16 @@
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="fragment_GPUInstancing.glsl" />
     <None Include="Shader\fragment_shader.glsl" />
     <None Include="Shader\fragment_skybox.glsl" />
     <None Include="Shader\vertex_shader.glsl" />
     <None Include="Shader\vertex_skybox.glsl" />
+    <None Include="vertex_GPUInstancing.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FishSimulation.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="MouseHandler.h" />

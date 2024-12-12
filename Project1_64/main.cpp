@@ -15,7 +15,7 @@
 glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, 1.0f, 1.0f)); // 斜向下的光照方向
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
 float smoothness = 0.0f;  // 默认的 smooth 值
-
+FishSimulation* fishSimulation;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
 float lastFrame = 0.0f;
@@ -206,9 +206,12 @@ unsigned int createShader(const char* vertexPath, const char* fragmentPath) {
 // 全局变量：平移矩阵
 glm::vec3 translation(0.0f, 0.0f, 0.0f);
 
-unsigned int shaderProgram_use;
 unsigned int textureID;
+
+unsigned int shaderProgram_use;
 unsigned int skyboxShaderProgram_use;
+unsigned int GPUInstancingShaderProgram_use;
+
 GLuint skyboxVAO;
 
 
@@ -368,14 +371,6 @@ void renderScene() {
     // 使用着色器程序
     glUseProgram(shaderProgram_use);
 
-    GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
-    GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
-    GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
-
-    // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
-    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
-    glUniform1f(smoothnessLoc, smoothness);
 
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
@@ -399,9 +394,7 @@ void renderScene() {
 
     for (int i = 0; i < fishmodels.size(); i++) {
         glBindVertexArray(fishmodels[i].VAO);
-
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-
         //just the tail sub animate
         if (i == 0)
         {
@@ -412,10 +405,10 @@ void renderScene() {
             modelMatrix = glm::translate(modelMatrix, translation);
         }
         modelMatrix = translationMatrix * modelMatrix;
-
-
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, fishmodels[i].textureID);
+        glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
         glDrawElements(GL_TRIANGLES, fishmodels[i].indices.size(), GL_UNSIGNED_INT, 0);
     }
 
@@ -430,13 +423,33 @@ void renderScene() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, model.textureID);
-        glUniform1i(glGetUniformLocation(shaderProgram_use, "ourTexture"), 0);
+        glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
 
         glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
     }
 
     glBindVertexArray(0);  // 解除绑定
     TwDraw();
+    //fishSimulation->updateFish(deltaTime);
+    //fishSimulation->renderFish(GPUInstancingShaderProgram_use);
+
+    GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
+    GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
+
+    // 设置默认的光照方向、光照颜色和 smooth 值
+    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
+    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
+    glUniform1f(smoothnessLoc, smoothness);
+
+    //GLint GPUlightDirLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightDirection");
+    //GLint GPUlightColorLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightColor");
+    //GLint GPUsmoothnessLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "smoothness");
+
+    //// 设置默认的光照方向、光照颜色和 smooth 值
+    //glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
+    //glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
+    //glUniform1f(GPUsmoothnessLoc, smoothness);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -452,6 +465,8 @@ void initGL() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     shaderProgram_use = createShader("../Project1_64/shader/vertex_shader.glsl", "../Project1_64/shader/fragment_shader.glsl");
     skyboxShaderProgram_use = createShader("../Project1_64/shader/vertex_skybox.glsl", "../Project1_64/shader/fragment_skybox.glsl");
+    GPUInstancingShaderProgram_use = createShader("../Project1_64/shader/vertex_GPUInstancing.glsl", "../Project1_64/shader/fragment_GPUInstancing.glsl");
+
     faces = getAllTexFiles("C:/Users/555/Desktop/assignment/CG_Project_1/SkyBoxTexture");
     cubemapTexture = loadCubemap(faces);
     // 启用深度测试

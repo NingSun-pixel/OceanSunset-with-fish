@@ -46,7 +46,7 @@ void loadSingleModel(const std::string& path, Model& model) {
         modelName = result;
     }
 
-    std::filesystem::path texturePath = modelDirectory + "/Texture_1/" + modelName + ".png";
+    std::filesystem::path texturePath = modelDirectory + "/Texture_3/" + modelName + ".png";
     cout << texturePath << endl;
     if (std::filesystem::exists(texturePath)) {
         model.textureID = TextureManager::getTexture(texturePath.string().c_str());
