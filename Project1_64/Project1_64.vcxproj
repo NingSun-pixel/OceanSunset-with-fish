@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FishSimulation.cpp" />
+    <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="MouseHandler.cpp" />
@@ -155,6 +156,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FishSimulation.h" />
+    <ClInclude Include="LightingManager.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="MouseHandler.h" />

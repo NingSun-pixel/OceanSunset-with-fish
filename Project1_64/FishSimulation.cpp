@@ -114,15 +114,16 @@ void FishSimulation::updateFish(float deltaTime) {
 // 渲染鱼群
 void FishSimulation::renderFish(GLuint shaderProgram) {
     glUseProgram(shaderProgram);
+    LightingManager& lighting = LightingManager::getInstance();
 
     GLint GPUlightDirLoc = glGetUniformLocation(shaderProgram, "lightDirection");
     GLint GPUlightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
     GLint GPUsmoothnessLoc = glGetUniformLocation(shaderProgram, "smoothness");
 
     // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
-    glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
-    glUniform1f(GPUsmoothnessLoc, smoothness);
+    glUniform3fv(GPUlightDirLoc, 1, &lighting.getLightDirection()[0]);
+    glUniform3fv(GPUlightColorLoc, 1, &lighting.getLightColor()[0]);
+    glUniform1f(GPUsmoothnessLoc, static_cast<float>(lighting.getSmoothness()));
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     // 全局变量：平移矩阵
     glm::vec3 translation(0.0f, 0.0f, 0.0f);

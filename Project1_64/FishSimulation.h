@@ -9,6 +9,7 @@
 #include <GL/glew.h>
 #include "Camera.h"
 #include "ModelLoader.h"
+#include "LightingManager.h"
 
 struct FishInstance {
     glm::vec3 position;

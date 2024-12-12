@@ -9,6 +9,7 @@ out vec4 FragColor;
 uniform vec3 lightDirection;  // 平行光的方向
 uniform vec3 lightColor;      // 平行光的颜色
 uniform vec3 viewPos;         // 观察者位置
+uniform float smoothness;//用作灯光强度
 uniform sampler2D albedoMap;  // 漫反射贴图
 uniform sampler2D normalMap;  // 法线贴图
 uniform sampler2D RoughnessMap;
@@ -113,7 +114,7 @@ void main()
 
     // 计算最终颜色
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.05;
 
     // 伽马校正
     color = color / (color + vec3(1.0));

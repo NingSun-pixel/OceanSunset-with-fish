@@ -27,11 +27,14 @@ struct Model {
     std::vector<unsigned int> indices;
 };
 
+//
+//// 默认光照方向和颜色
+//static glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.55f, -0.55f, -0.66f)); // 斜向下的光照方向
+//static glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
+//// 定义在某个源文件
+//static glm::float64 smoothness = 0.6f;
 
-// 默认光照方向和颜色
-static glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.55f, -0.55f, -0.66f)); // 斜向下的光照方向
-static glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
-static float smoothness = 0.0f;  // 默认的 smooth 值
+
 
 void loadSingleModel(const std::string& path, Model& model);
 void loadSeparateModels(const std::vector<std::string>& fbxFiles, std::vector<Model>& models);

@@ -10,8 +10,6 @@
 #include <cmath>
 #include "main.h"
 
-
-
 FishSimulation* fishSimulation;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
@@ -339,7 +337,7 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
 unsigned int VAO, VBO, EBO;
 
 
-
+LightingManager& lighting = LightingManager::getInstance();
 //get all Tex
 std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
     std::vector<std::string> fbxFiles;
@@ -375,10 +373,9 @@ void renderScene() {
     GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
 
     // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
-    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
-    glUniform1f(smoothnessLoc, smoothness);
-
+    glUniform3fv(lightDirLoc, 1, &lighting.getLightDirection()[0]);
+    glUniform3fv(lightColorLoc, 1, &lighting.getLightColor()[0]);
+    glUniform1f(smoothnessLoc, static_cast<float>(lighting.getSmoothness()));
 
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
@@ -404,6 +401,7 @@ void renderScene() {
     // hierarchy (big animation)
     float translationDistance = speed * currentTime *0.1f;  // 计算平移距离
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(translationDistance, 0.0f, 0.0f));
+    std::cout << "外部的Smoothness: " << lighting.getSmoothness() << std::endl;
 
 
 
@@ -438,8 +436,6 @@ void renderScene() {
     TwDraw();
     fishSimulation->updateFish(deltaTime);
     fishSimulation->renderFish(GPUInstancingShaderProgram_use);
-
-
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -493,6 +489,29 @@ void mouseMotionCallback(int x, int y) {
     }
 }
 
+void TW_CALL GetLightDirection(void* value, void* clientData) {
+    *(glm::vec3*)value = LightingManager::getInstance().getLightDirection();
+}
+
+void TW_CALL SetLightDirection(const void* value, void* clientData) {
+    LightingManager::getInstance().setLightDirection(*(const glm::vec3*)value);
+}
+
+void TW_CALL GetLightColor(void* value, void* clientData) {
+    *(glm::vec3*)value = LightingManager::getInstance().getLightColor();
+}
+
+void TW_CALL SetLightColor(const void* value, void* clientData) {
+    LightingManager::getInstance().setLightColor(*(const glm::vec3*)value);
+}
+
+void TW_CALL GetSmoothness(void* value, void* clientData) {
+    *(double*)value = LightingManager::getInstance().getSmoothness();
+}
+
+void TW_CALL SetSmoothness(const void* value, void* clientData) {
+    LightingManager::getInstance().setSmoothness(*(const double*)value);
+}
 
 
 // 初始化 OpenGL 和 AntTweakBar
@@ -510,13 +529,19 @@ void initOpenGLAndAntTweakBar() {
     TwWindowSize(windowWidth, windowHeight);
 
     // 添加光照方向变量
-    TwAddVarRW(bar, "Light Direction", TW_TYPE_DIR3F, &lightDirection[0],
-        "label='Light Direction' help='Adjust the light direction'");
+    TwAddVarCB(bar, "Light Direction", TW_TYPE_DIR3F,
+        SetLightDirection, GetLightDirection,
+        nullptr, "label='Light Direction' help='Adjust the light direction'");
 
     // 添加光照颜色变量
-    TwAddVarRW(bar, "Light Color", TW_TYPE_COLOR3F, &lightColor[0],
-        "label='Light Color' help='Adjust the light color'");
+    TwAddVarCB(bar, "Light Color", TW_TYPE_COLOR3F,
+        SetLightColor, GetLightColor,
+        nullptr, "label='Light Color' help='Adjust the light color'");
 
+    // 添加 smoothness 变量
+    TwAddVarCB(bar, "LightStrength", TW_TYPE_DOUBLE,
+        SetSmoothness, GetSmoothness,
+        nullptr, "label='Value' min=0 max=100 step=0.1");
 
     // 使用临时数组设置参数
     int position[] = { windowWidth - barWidth, windowHeight - barHeight };
@@ -526,8 +551,7 @@ void initOpenGLAndAntTweakBar() {
     TwSetParam(bar, NULL, "size", TW_PARAM_INT32, 2, size);
 
     // 添加一个简单的按钮和一个浮点变量到 Tweak Bar
-    static float value = 0.0f;
-    TwAddVarRW(bar, "Value", TW_TYPE_FLOAT, &value, " label='Value' min=0 max=100 step=1 ");
+    //static float value = 0.0f;
 }
 
 
@@ -558,7 +582,7 @@ int main(int argc, char** argv) {
     fishSimulation->loadFishModel(fbxfishFiles[0]);
 
     std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_4");
-    loadModels(fbxFiles);
+    //loadModels(fbxFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象
