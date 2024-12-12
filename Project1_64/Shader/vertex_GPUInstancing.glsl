@@ -12,6 +12,7 @@ layout(location = 5) in vec3 instanceVelocity;    // 实例速度
 layout(location = 6) in vec3 instanceScale;       // 实例缩放
 layout(location = 7) in float instanceRotation;   // 实例旋转角度
 uniform float deltaTime;
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -52,8 +53,8 @@ void main() {
 
     mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
-    gl_Position = projection * translationMatrix * view  * vec4(inPosition, 1.0);
-
+    gl_Position = projection * translationMatrix * view  * vec4(inPosition.x, inPosition.z, inPosition.y, 1.0);
+    Normal = mat3(transpose(inverse(model))) * inNormal;
     VertColor = updatedPosition; // 设置颜色
     TexCoords = inTexCoords;
 }

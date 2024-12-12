@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include<iostream>
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFov)
     : position(startPosition), up(startUp), yaw(startYaw), pitch(startPitch), fov(startFov) {
@@ -14,7 +15,7 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
 }
 
 void Camera::processKeyboard(char key, float deltaTime) {
-    float velocity = 2.5f * deltaTime;
+    float velocity = 10.0f * deltaTime;
     if (key == 'w')
         position += front * velocity;
     if (key == 's')
@@ -23,6 +24,7 @@ void Camera::processKeyboard(char key, float deltaTime) {
         position -= glm::normalize(glm::cross(front, up)) * velocity;
     if (key == 'd')
         position += glm::normalize(glm::cross(front, up)) * velocity;
+
 }
 
 void Camera::processMouseMovement(float xOffset, float yOffset) {

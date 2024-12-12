@@ -34,10 +34,12 @@ void MouseHandler::handleMouseMotion(int x, int y) {
 }
 
 void MouseHandler::processKeys(unsigned char key, int x, int y) {
-    if (!TwEventKeyboardGLUT(key, x, y)) { // 如果事件未被UI处理
-        float deltaTime = 0.1f;
-        camera.processKeyboard(key, deltaTime);
-        glutPostRedisplay();
-    }
+    float deltaTime = 0.1f;
+
+    camera.processKeyboard(key, deltaTime);
+
+    //if (!TwEventKeyboardGLUT(key, x, y)) { // 如果事件未被UI处理
+    //    glutPostRedisplay();
+    //}
 }
 

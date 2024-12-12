@@ -11,10 +11,7 @@
 #include "main.h"
 
 
-// 默认光照方向和颜色
-glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, 1.0f, 1.0f)); // 斜向下的光照方向
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
-float smoothness = 0.0f;  // 默认的 smooth 值
+
 FishSimulation* fishSimulation;
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
@@ -373,13 +370,27 @@ void renderScene() {
     glUseProgram(shaderProgram_use);
 
 
+    GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
+    GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
+    GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
+
+    // 设置默认的光照方向、光照颜色和 smooth 值
+    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
+    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
+    glUniform1f(smoothnessLoc, smoothness);
+
 
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
     float deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
+    glm::vec3 viewPos = camera.position;
 
+
+    // 传递位置
+    GLuint viewPosLocation = glGetUniformLocation(shaderProgram_use, "viewPos");
+    glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
 
     // transfer view and projection Matrix to shader
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -403,37 +414,32 @@ void renderScene() {
         modelMatrix = glm::translate(modelMatrix, translation);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram_use, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+        // 绑定 Diffuse 贴图到纹理单元 0
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, model.textureID);
-        glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0);
+        glBindTexture(GL_TEXTURE_2D, model.textureID_D);
+        glUniform1i(glGetUniformLocation(shaderProgram_use, "albedoMap"), 0); // 将纹理单元 0 绑定到 albedoMap
+
+        // 绑定 Normal 贴图到纹理单元 1
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, model.textureID_N);
+        glUniform1i(glGetUniformLocation(shaderProgram_use, "normalMap"), 1); // 将纹理单元 1 绑定到 normalMap
+
+        // 绑定 Roughness 贴图到纹理单元 2
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, model.textureID_R);
+        glUniform1i(glGetUniformLocation(shaderProgram_use, "RoughnessMap"), 2); // 将纹理单元 2 绑定到 RoughnessMap
+
 
         glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);  // 解除绑定
     }
 
-    glBindVertexArray(0);  // 解除绑定
+
     TwDraw();
     fishSimulation->updateFish(deltaTime);
     fishSimulation->renderFish(GPUInstancingShaderProgram_use);
 
 
-
-    GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
-    GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
-    GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
-
-    // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(lightDirLoc, 1, &lightDirection[0]);
-    glUniform3fv(lightColorLoc, 1, &lightColor[0]);
-    glUniform1f(smoothnessLoc, smoothness);
-
-    GLint GPUlightDirLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightDirection");
-    GLint GPUlightColorLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "lightColor");
-    GLint GPUsmoothnessLoc = glGetUniformLocation(GPUInstancingShaderProgram_use, "smoothness");
-
-    // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
-    glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
-    glUniform1f(GPUsmoothnessLoc, smoothness);
 
     glutSwapBuffers();
     glutPostRedisplay();
@@ -543,13 +549,16 @@ int main(int argc, char** argv) {
     }
     initGL();
     initOpenGLAndAntTweakBar();
-    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
+    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_4");
     FishSimulation fishSim(1000, camera);
     fishSimulation = &fishSim;
 
     fishSimulation->initFishInstances();
     cout << "loadFishModels"<< endl;
     fishSimulation->loadFishModel(fbxfishFiles[0]);
+
+    std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_4");
+    loadModels(fbxFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象
@@ -560,12 +569,6 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouseButtonCallback);
     glutMotionFunc(mouseMotionCallback);
     InitializeFishTail();
-
-
-    //loadSeparateModels(fbxfishFiles,fishmodels);
-    //// 加载模型并设置 OpenGL 缓冲区
-    //std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_3");
-    //loadModels(fbxFiles);
 
     glutMainLoop(); 
     return 0;

@@ -11,6 +11,7 @@ uniform vec3 lightColor;      // 平行光的颜色
 uniform vec3 viewPos;         // 观察者位置
 uniform sampler2D albedoMap;  // 漫反射贴图
 uniform sampler2D normalMap;  // 法线贴图
+uniform sampler2D RoughnessMap;
 
 // 材质属性
 uniform float metallic;
@@ -83,14 +84,15 @@ void main()
 {
     // 获取材质属性
     vec3 albedo = texture(albedoMap, TexCoords).rgb;
-    vec3 N = Normal;// calculateNormal();
+    vec3 N = calculateNormal();
     vec3 V = normalize(viewPos - FragPos);
     vec3 L = normalize(-lightDirection); // 平行光方向需要反转
     vec3 H = normalize(V + L);
+    float Roughness_Tex = texture(RoughnessMap, TexCoords).r;
 
     // Cook-Torrance BRDF
-    float NDF = DistributionGGX(N, H, roughness);   // Normal Distribution Function
-    float G = GeometrySmith(N, V, L, roughness);    // Geometry function
+    float NDF = DistributionGGX(N, H, Roughness_Tex);   // Normal Distribution Function
+    float G = GeometrySmith(N, V, L, Roughness_Tex);    // Geometry function
     vec3 F0 = vec3(0.04);                           // Fresnel reflectance at normal incidence
     F0 = mix(F0, albedo, metallic);
     vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0); // Fresnel-Schlick approximation
@@ -111,7 +113,7 @@ void main()
 
     // 计算最终颜色
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL;
 
     // 伽马校正
     color = color / (color + vec3(1.0));

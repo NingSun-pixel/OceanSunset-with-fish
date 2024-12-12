@@ -95,6 +95,8 @@ void FishSimulation::loadFishModel(const std::string& modelPath) {
     glBindVertexArray(0);
 }
 
+
+
 // 更新鱼群实例
 void FishSimulation::updateFish(float deltaTime) {
     for (auto& fish : instances) {
@@ -113,10 +115,44 @@ void FishSimulation::updateFish(float deltaTime) {
 void FishSimulation::renderFish(GLuint shaderProgram) {
     glUseProgram(shaderProgram);
 
+    GLint GPUlightDirLoc = glGetUniformLocation(shaderProgram, "lightDirection");
+    GLint GPUlightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+    GLint GPUsmoothnessLoc = glGetUniformLocation(shaderProgram, "smoothness");
+
+    // 设置默认的光照方向、光照颜色和 smooth 值
+    glUniform3fv(GPUlightDirLoc, 1, &lightDirection[0]);
+    glUniform3fv(GPUlightColorLoc, 1, &lightColor[0]);
+    glUniform1f(GPUsmoothnessLoc, smoothness);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    // 全局变量：平移矩阵
+    glm::vec3 translation(0.0f, 0.0f, 0.0f);
+    modelMatrix = glm::translate(modelMatrix, translation);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glm::vec3 viewPos = camera.position;
+
+    // 传递位置
+    GLuint viewPosLocation = glGetUniformLocation(shaderProgram, "viewPos");
+    glUniform3fv(viewPosLocation, 1, glm::value_ptr(viewPos));
     glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+    glm::mat4 projection = camera.getProjectionMatrix(1920.0f / 1080.0f);  // 假设窗口是1920.0f / 1080.0f
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    // 绑定 Diffuse (Albedo) 贴图到纹理单元 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fishModel.textureID_D);
+    glUniform1i(glGetUniformLocation(shaderProgram, "albedoMap"), 0);
+
+    //// 绑定 Normal 贴图到纹理单元 1
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fishModel.textureID_N);
+    glUniform1i(glGetUniformLocation(shaderProgram, "normalMap"), 1);
+
+    // 绑定 Roughness 贴图到纹理单元 2
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, fishModel.textureID_R);
+    glUniform1i(glGetUniformLocation(shaderProgram, "RoughnessMap"), 2);
 
     glBindVertexArray(fishModel.VAO);
     glDrawElementsInstanced(GL_TRIANGLES, fishModel.indices.size(), GL_UNSIGNED_INT, 0, numInstances);

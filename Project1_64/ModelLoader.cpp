@@ -46,10 +46,22 @@ void loadSingleModel(const std::string& path, Model& model) {
         modelName = result;
     }
 
-    std::filesystem::path texturePath = modelDirectory + "/Texture_3/" + modelName + ".png";
-    cout << texturePath << endl;
-    if (std::filesystem::exists(texturePath)) {
-        model.textureID = TextureManager::getTexture(texturePath.string().c_str());
+    std::filesystem::path texturePath_D = modelDirectory + "/Texture_DNR/" + modelName  + "_D.png";
+    cout << texturePath_D << endl;
+    if (std::filesystem::exists(texturePath_D)) {
+        model.textureID_D = TextureManager::getTexture(texturePath_D.string().c_str());
+    }
+
+    std::filesystem::path texturePath_N = modelDirectory + "/Texture_DNR/" + modelName + "_N.png";
+    cout << texturePath_N << endl;
+    if (std::filesystem::exists(texturePath_N)) {
+        model.textureID_N = TextureManager::getTexture(texturePath_N.string().c_str());
+    }
+
+    std::filesystem::path texturePath_R = modelDirectory + "/Texture_DNR/" + modelName + "_R.png";
+    cout << texturePath_R << endl;
+    if (std::filesystem::exists(texturePath_R)) {
+        model.textureID_R = TextureManager::getTexture(texturePath_R.string().c_str());
     }
 
     glGenVertexArrays(1, &model.VAO);
