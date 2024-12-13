@@ -15,8 +15,8 @@ class LightingManager {
 private:
     LightingManager()
         : lightDirection(glm::normalize(glm::vec3(-0.55f, -0.55f, -0.66f))),
-        lightColor(glm::vec3(1.0f, 1.0f, 1.0f)),
-        smoothness(0.6f),
+        lightColor(glm::vec3(1.0f, 0.2f, 0.0f)),
+        smoothness(15.0f),
         toggleLightingPreset(false),
         targetLightDirection(lightDirection),
         targetLightColor(lightColor),
