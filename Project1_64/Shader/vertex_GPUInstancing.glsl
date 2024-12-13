@@ -53,7 +53,7 @@ void main() {
 
     mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
-    gl_Position = projection * view * translationMatrix * vec4(inPosition.x, inPosition.z, inPosition.y, 1.0);
+    gl_Position = projection * view * modelMatrix * vec4(inPosition.x, inPosition.z, inPosition.y, 1.0);
     Normal = mat3(transpose(inverse(model))) * inNormal;
     VertColor = updatedPosition; // …Ë÷√—’…´
     TexCoords = inTexCoords;

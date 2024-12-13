@@ -34,6 +34,7 @@ private:
     GLuint instanceVBO;
     Model fishModel;
     Camera& camera;
+    std::vector<glm::vec3> centers;                // 多中心点位置
 };
 
 #endif // FISH_SIMULATION_H

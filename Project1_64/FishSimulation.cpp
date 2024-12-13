@@ -22,18 +22,25 @@ void FishSimulation::initFishInstances() {
     instances.resize(numInstances);
     for (int i = 0; i < numInstances; ++i) {
         instances[i].position = glm::vec3(
-            randomFloat(-10.0f, 10.0f),
-            randomFloat(-5.0f, 5.0f),
-            randomFloat(-10.0f, 10.0f)
+            randomFloat(-20.0f, 20.0f),
+            randomFloat(0.0f, 20.0f),
+            randomFloat(-20.0f, 20.0f)
         );
         instances[i].velocity = glm::vec3(
-            randomFloat(-0.1f, 0.1f),
-            randomFloat(-0.1f, 0.1f),
-            randomFloat(-0.1f, 0.1f)
+            randomFloat(-0.5f, 0.5f),
+            randomFloat(-0.5f, 0.5f),
+            randomFloat(-0.5f, 0.5f)
         );
-        instances[i].scale = glm::vec3(randomFloat(0.5f, 1.5f));
-        instances[i].rotation = randomFloat(0.0f, 360.0f);
+        instances[i].scale = glm::vec3(randomFloat(0.8f, 1.2f));
+        instances[i].rotation = randomFloat(-30.0f, 30.0f);
     }
+
+        // 初始化多中心点
+    centers = {
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(20.0f, 10.0f, 20.0f),
+        glm::vec3(-20.0f, -10.0f, -20.0f)
+    };
 
     // 创建实例化缓冲区
     glGenBuffers(1, &instanceVBO);
