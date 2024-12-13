@@ -85,7 +85,7 @@ void main()
 {
     // 获取材质属性
     vec3 albedo = texture(albedoMap, TexCoords).rgb;
-    vec3 N = calculateNormal();
+    vec3 N = Normal;
     vec3 V = normalize(viewPos - FragPos);
     vec3 L = normalize(-lightDirection); // 平行光方向需要反转
     vec3 H = normalize(V + L);
@@ -111,15 +111,15 @@ void main()
     // Lambertian diffuse
     float NdotL = max(dot(N, L), 0.0);
     vec3 diffuse = kD * albedo / 3.14159265359;
+    
 
     // 计算最终颜色
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.2;
 
     // 伽马校正
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
     FragColor = vec4(color, 1.0);
-
 }

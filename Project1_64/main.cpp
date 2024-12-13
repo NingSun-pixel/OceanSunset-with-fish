@@ -353,9 +353,15 @@ std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
 
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // 更新光照参数
     // 获取相机的视图和投影矩阵
     // 获取当前时间（秒）
     float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    float deltaTime = currentTime - lastFrame;
+    lastFrame = currentTime;
+    LightingManager::getInstance().updateLighting(deltaTime);
+
     // 传递时间变量给顶点着色器
     glUniform1f(glGetUniformLocation(shaderProgram_use, "uTime"), currentTime);
     glm::mat4 view = camera.getViewMatrix();
@@ -367,20 +373,41 @@ void renderScene() {
     // 使用着色器程序
     glUseProgram(shaderProgram_use);
 
+    // 光照参数切换逻辑
+    static bool lastToggleState = false; // 记录上一次的布尔值状态
+    bool currentToggleState = LightingManager::getInstance().gettoggleLightingPreset();
+
+    //if (currentToggleState != lastToggleState) {
+    //    if (currentToggleState) {
+    //        // 切换到预设 2
+    //        //黄调
+    //        LightingManager::getInstance().setLightDirection(glm::vec3(-1.0f, 1.0f, 0.0f));
+    //        LightingManager::getInstance().setLightColor(glm::vec3(1.0f, 0.5f, 0.0f));
+    //        LightingManager::getInstance().setSmoothness(10.0);
+    //    }
+    //    else {
+    //        // 切换到预设 1
+    //        //蓝调
+    //        LightingManager::getInstance().setLightDirection(glm::vec3(1.0f, -1.0f, 0.0f));
+    //        LightingManager::getInstance().setLightColor(glm::vec3(0.0f, 1.0f, 1.0f));
+    //        LightingManager::getInstance().setSmoothness(5.0);
+    //    }
+    //    lastToggleState = currentToggleState; // 更新状态
+    //}
 
     GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
     GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
 
-    // 设置默认的光照方向、光照颜色和 smooth 值
-    glUniform3fv(lightDirLoc, 1, &lighting.getLightDirection()[0]);
-    glUniform3fv(lightColorLoc, 1, &lighting.getLightColor()[0]);
-    glUniform1f(smoothnessLoc, static_cast<float>(lighting.getSmoothness()));
+    // 设置光照方向、光照颜色和 smooth 值
+    glUniform3fv(lightDirLoc, 1, &LightingManager::getInstance().getLightDirection()[0]);
+    glUniform3fv(lightColorLoc, 1, &LightingManager::getInstance().getLightColor()[0]);
+    glUniform1f(smoothnessLoc, static_cast<float>(LightingManager::getInstance().getSmoothness()));
 
     // control camera speed
     float currentFrame = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-    float deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+    //float deltaTime = currentFrame - lastFrame;
+    //lastFrame = currentFrame;
 
     glm::vec3 viewPos = camera.position;
 
@@ -399,11 +426,8 @@ void renderScene() {
 
     float speed = 0.5f;  // speed
     // hierarchy (big animation)
-    float translationDistance = speed * currentTime *0.1f;  // 计算平移距离
+    float translationDistance = speed * currentTime * 0.1f;  // 计算平移距离
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(translationDistance, 0.0f, 0.0f));
-    std::cout << "外部的Smoothness: " << lighting.getSmoothness() << std::endl;
-
-
 
     for (const auto& model : models) {
         glBindVertexArray(model.VAO);
@@ -451,7 +475,7 @@ void initGL() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     shaderProgram_use = createShader("../Project1_64/shader/vertex_shader.glsl", "../Project1_64/shader/fragment_shader.glsl");
     skyboxShaderProgram_use = createShader("../Project1_64/shader/vertex_skybox.glsl", "../Project1_64/shader/fragment_skybox.glsl");
-    GPUInstancingShaderProgram_use = createShader("../Project1_64/shader/vertex_GPUInstancing.glsl", "../Project1_64/shader/fragment_GPUInstancing.glsl");
+    GPUInstancingShaderProgram_use = createShader("../Project1_64/shader/vertex_GPUInstancing.glsl", "../Project1_64/shader/fragment_shader.glsl");
 
     faces = getAllTexFiles("C:/Users/555/Desktop/assignment/CG_Project_1/SkyBoxTexture");
     cubemapTexture = loadCubemap(faces);
@@ -489,32 +513,6 @@ void mouseMotionCallback(int x, int y) {
     }
 }
 
-void TW_CALL GetLightDirection(void* value, void* clientData) {
-    *(glm::vec3*)value = LightingManager::getInstance().getLightDirection();
-}
-
-void TW_CALL SetLightDirection(const void* value, void* clientData) {
-    LightingManager::getInstance().setLightDirection(*(const glm::vec3*)value);
-}
-
-void TW_CALL GetLightColor(void* value, void* clientData) {
-    *(glm::vec3*)value = LightingManager::getInstance().getLightColor();
-}
-
-void TW_CALL SetLightColor(const void* value, void* clientData) {
-    LightingManager::getInstance().setLightColor(*(const glm::vec3*)value);
-}
-
-void TW_CALL GetSmoothness(void* value, void* clientData) {
-    *(double*)value = LightingManager::getInstance().getSmoothness();
-}
-
-void TW_CALL SetSmoothness(const void* value, void* clientData) {
-    LightingManager::getInstance().setSmoothness(*(const double*)value);
-}
-
-
-// 初始化 OpenGL 和 AntTweakBar
 void initOpenGLAndAntTweakBar() {
     // 初始化 AntTweakBar
     TwInit(TW_OPENGL, NULL);
@@ -523,35 +521,56 @@ void initOpenGLAndAntTweakBar() {
     TwBar* bar = TwNewBar("Settings");
 
     // 设置 Tweak Bar 的位置和大小
-    // 将 UI 放在窗口的右下角
     int barWidth = 400;  // Tweak Bar 的宽度
     int barHeight = 200; // Tweak Bar 的高度
     TwWindowSize(windowWidth, windowHeight);
 
     // 添加光照方向变量
     TwAddVarCB(bar, "Light Direction", TW_TYPE_DIR3F,
-        SetLightDirection, GetLightDirection,
+        [](const void* value, void* clientData) {
+            LightingManager::getInstance().setLightDirection(*static_cast<const glm::vec3*>(value));
+        },
+        [](void* value, void* clientData) {
+            *static_cast<glm::vec3*>(value) = LightingManager::getInstance().getLightDirection();
+        },
         nullptr, "label='Light Direction' help='Adjust the light direction'");
 
     // 添加光照颜色变量
     TwAddVarCB(bar, "Light Color", TW_TYPE_COLOR3F,
-        SetLightColor, GetLightColor,
+        [](const void* value, void* clientData) {
+            LightingManager::getInstance().setLightColor(*static_cast<const glm::vec3*>(value));
+        },
+        [](void* value, void* clientData) {
+            *static_cast<glm::vec3*>(value) = LightingManager::getInstance().getLightColor();
+        },
         nullptr, "label='Light Color' help='Adjust the light color'");
 
     // 添加 smoothness 变量
     TwAddVarCB(bar, "LightStrength", TW_TYPE_DOUBLE,
-        SetSmoothness, GetSmoothness,
+        [](const void* value, void* clientData) {
+            LightingManager::getInstance().setSmoothness(*static_cast<const double*>(value));
+        },
+        [](void* value, void* clientData) {
+            *static_cast<double*>(value) = LightingManager::getInstance().getSmoothness();
+        },
         nullptr, "label='Value' min=0 max=100 step=0.1");
 
-    // 使用临时数组设置参数
+    // 添加布尔变量用于切换光照参数
+    TwAddVarCB(bar, "Toggle Lighting Preset", TW_TYPE_BOOLCPP,
+        [](const void* value, void* clientData) {
+            LightingManager::getInstance().settoggleLightingPreset(*static_cast<const bool*>(value));
+        },
+        [](void* value, void* clientData) {
+            *static_cast<bool*>(value) = LightingManager::getInstance().gettoggleLightingPreset();
+        },
+        nullptr, "label='Toggle Lighting Preset' help='Switch between two lighting presets'");
+
+    // 设置 Tweak Bar 的位置和大小
     int position[] = { windowWidth - barWidth, windowHeight - barHeight };
     TwSetParam(bar, NULL, "position", TW_PARAM_INT32, 2, position);
 
     int size[] = { barWidth, barHeight };
     TwSetParam(bar, NULL, "size", TW_PARAM_INT32, 2, size);
-
-    // 添加一个简单的按钮和一个浮点变量到 Tweak Bar
-    //static float value = 0.0f;
 }
 
 
@@ -582,7 +601,7 @@ int main(int argc, char** argv) {
     fishSimulation->loadFishModel(fbxfishFiles[0]);
 
     std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_4");
-    //loadModels(fbxFiles);
+    loadModels(fbxFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象
