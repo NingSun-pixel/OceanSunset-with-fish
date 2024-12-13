@@ -72,7 +72,7 @@ public:
                 targetSmoothness = 15.0;
             }
             else {
-                targetLightDirection = glm::vec3(1.0f, -1.0f, 0.0f);
+                targetLightDirection = glm::vec3(-0.55f, -0.55f, -0.66f);
                 targetLightColor = glm::vec3(0.2f, 1.0f, 1.0f);
                 targetSmoothness = 8.0;
             }
