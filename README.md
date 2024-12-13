@@ -9,3 +9,6 @@ Rebuilding the physically based rendering pipeline in OpenGL.
 ![image](https://github.com/user-attachments/assets/6be7ce7d-42d6-41cf-bb06-e7b5aa9a7610)
 ![image](https://github.com/user-attachments/assets/e74dba6a-6110-444d-ad13-343f2987705d)
 ![image](https://github.com/user-attachments/assets/c6a6723e-c916-43cc-94ef-26df9704151b)
+Two Light Setting
+![image](https://github.com/user-attachments/assets/46d15dd4-b2d9-4e5b-90f7-4c75d55f0876)
+![image](https://github.com/user-attachments/assets/f6803f48-1d6f-42c2-acec-382ef2480b7a)
