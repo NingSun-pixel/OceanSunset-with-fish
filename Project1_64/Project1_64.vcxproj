@@ -146,7 +146,7 @@
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment_GPUInstancing.glsl" />
+    <None Include="Shader\fragment_GPUInstancing.glsl" />
     <None Include="Shader\fragment_shader.glsl" />
     <None Include="Shader\fragment_skybox.glsl" />
     <None Include="Shader\vertex_shader.glsl" />

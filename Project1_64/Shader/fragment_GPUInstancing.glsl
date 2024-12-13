@@ -14,6 +14,14 @@ uniform sampler2D albedoMap;  // 漫反射贴图
 uniform sampler2D normalMap;  // 法线贴图
 uniform sampler2D RoughnessMap;
 
+// Fog parameters
+uniform vec3 fogColor;        // 雾颜色
+uniform float fogDensity;     // 雾密度
+uniform float fogHeightStart; // 雾开始高度
+uniform float fogHeightEnd;   // 雾结束高度
+uniform float fogDistanceStart; // 距离雾开始距离
+uniform float fogDistanceEnd;   // 距离雾结束距离
+
 // 材质属性
 uniform float metallic;
 uniform float roughness;
@@ -81,6 +89,25 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+float calculateFogFactor(float height, float fogStart, float fogEnd, float density)
+{
+    if (height < fogStart) return 1.0;  // 在最低高度以下雾浓度最大
+    if (height > fogEnd) return 0.0;    // 超过最高高度无雾
+
+    float t = (fogEnd - height) / (fogEnd - fogStart); // 从高到低计算比例
+    return t;        // 雾浓度随高度变化
+}
+
+float calculateDistanceFogFactor(float distance, float fogStart, float fogEnd)
+{
+    if (distance < fogStart) return 0.0;
+    if (distance > fogEnd) return 1.0;
+
+    float t = (distance - fogStart) / (fogEnd - fogStart);
+    return t;
+}
+
+
 void main()
 {
     // 获取材质属性
@@ -112,13 +139,29 @@ void main()
     float NdotL = max(dot(N, L), 0.0);
     vec3 diffuse = kD * albedo / 3.14159265359;
 
+
     // 计算最终颜色
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.2;
 
     // 伽马校正
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
 
-    FragColor = vec4(color, 1.0);
+    // Calculate height-based fog factor
+    float height = FragPos.z;
+    float heightFogFactor = calculateFogFactor(height, fogHeightStart, fogHeightEnd, fogDensity);
+
+    // Calculate distance-based fog factor
+    float distance = length(viewPos - FragPos);
+    float distanceFogFactor = calculateDistanceFogFactor(distance, fogDistanceStart, fogDistanceEnd);
+
+    // Combine fog factors
+    float combinedFogFactor = heightFogFactor * distanceFogFactor;
+
+    // Mix fog color and final color
+    vec3 finalColor = mix(color, fogColor, combinedFogFactor);
+
+
+    FragColor = vec4(finalColor, 1.0);
 }

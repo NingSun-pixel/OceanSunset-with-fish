@@ -9,8 +9,8 @@ struct FogSettings {
     float fogDensity = 0.05f;
     float fogHeightStart = 10.0f;
     float fogHeightEnd = 50.0f;
-    float fogDistanceStart = 30.0f;
-    float fogDistanceEnd = 100.0f;
+    float fogDistanceStart = 50.0f;
+    float fogDistanceEnd = 200.0f;
 };
 
 class LightingManager {

@@ -477,7 +477,7 @@ void initGL() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     shaderProgram_use = createShader("../Project1_64/shader/vertex_shader.glsl", "../Project1_64/shader/fragment_shader.glsl");
     skyboxShaderProgram_use = createShader("../Project1_64/shader/vertex_skybox.glsl", "../Project1_64/shader/fragment_skybox.glsl");
-    GPUInstancingShaderProgram_use = createShader("../Project1_64/shader/vertex_GPUInstancing.glsl", "../Project1_64/shader/fragment_shader.glsl");
+    GPUInstancingShaderProgram_use = createShader("../Project1_64/shader/vertex_GPUInstancing.glsl", "../Project1_64/shader/fragment_GPUInstancing.glsl");
 
     faces = getAllTexFiles("C:/Users/555/Desktop/assignment/CG_Project_1/SkyBoxTexture");
     cubemapTexture = loadCubemap(faces);

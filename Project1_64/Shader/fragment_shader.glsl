@@ -112,7 +112,7 @@ void main()
 {
     // 获取材质属性
     vec3 albedo = texture(albedoMap, TexCoords).rgb;
-    vec3 N = Normal;
+    vec3 N = calculateNormal();
     vec3 V = normalize(viewPos - FragPos);
     vec3 L = normalize(-lightDirection); // 平行光方向需要反转
     vec3 H = normalize(V + L);

@@ -65,7 +65,7 @@
     <None Include="vertex_GPUInstancing.glsl">
       <Filter>Source Files\Shader</Filter>
     </None>
-    <None Include="fragment_GPUInstancing.glsl">
+    <None Include="Shader\fragment_GPUInstancing.glsl">
       <Filter>Source Files\Shader</Filter>
     </None>
   </ItemGroup>
