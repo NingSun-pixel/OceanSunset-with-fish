@@ -1,4 +1,5 @@
 #include "Skybox.h"
+#include "LightingManager.h"
 
 GLuint loadCubemap(std::vector<std::string> faces) {
     GLuint textureID;
@@ -41,6 +42,13 @@ void renderSkybox(GLuint skyboxShader, GLuint skyboxVAO, GLuint cubemapTexture, 
     glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
     glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "view"), 1, GL_FALSE, glm::value_ptr(skyboxView));
     glUniformMatrix4fv(glGetUniformLocation(skyboxShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    GLint lightColorLoc = glGetUniformLocation(skyboxShader, "lightColor");
+    GLint smoothnessLoc = glGetUniformLocation(skyboxShader, "smoothness");
+
+    // 设置光照方向、光照颜色和 smooth 值
+    glUniform3fv(lightColorLoc, 1, &LightingManager::getInstance().getLightColor()[0]);
+    glUniform1f(smoothnessLoc, static_cast<float>(LightingManager::getInstance().getSmoothness()));
 
     // 绑定天空盒的立方体贴图
     glBindVertexArray(skyboxVAO);
