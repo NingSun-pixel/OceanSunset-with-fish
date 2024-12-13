@@ -120,6 +120,26 @@ void FishSimulation::renderFish(GLuint shaderProgram) {
     GLint GPUlightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
     GLint GPUsmoothnessLoc = glGetUniformLocation(shaderProgram, "smoothness");
 
+    // 获取雾相关参数的 Uniform 位置
+    GLint fogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
+    GLint fogDensityLoc = glGetUniformLocation(shaderProgram, "fogDensity");
+    GLint fogHeightStartLoc = glGetUniformLocation(shaderProgram, "fogHeightStart");
+    GLint fogHeightEndLoc = glGetUniformLocation(shaderProgram, "fogHeightEnd");
+    GLint fogDistanceStartLoc = glGetUniformLocation(shaderProgram, "fogDistanceStart");
+    GLint fogDistanceEndLoc = glGetUniformLocation(shaderProgram, "fogDistanceEnd");
+
+    // 获取 LightingManager 的实例
+    const LightingManager& lightingManager = LightingManager::getInstance();
+    const FogSettings& fogSettings = lightingManager.getFogSettings();
+
+    // 设置雾效参数
+    glUniform3fv(fogColorLoc, 1, &fogSettings.fogColor[0]);
+    glUniform1f(fogDensityLoc, fogSettings.fogDensity);
+    glUniform1f(fogHeightStartLoc, fogSettings.fogHeightStart);
+    glUniform1f(fogHeightEndLoc, fogSettings.fogHeightEnd);
+    glUniform1f(fogDistanceStartLoc, fogSettings.fogDistanceStart);
+    glUniform1f(fogDistanceEndLoc, fogSettings.fogDistanceEnd);
+
     // 设置默认的光照方向、光照颜色和 smooth 值
     glUniform3fv(GPUlightDirLoc, 1, &lighting.getLightDirection()[0]);
     glUniform3fv(GPUlightColorLoc, 1, &lighting.getLightColor()[0]);

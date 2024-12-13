@@ -377,27 +377,29 @@ void renderScene() {
     static bool lastToggleState = false; // 记录上一次的布尔值状态
     bool currentToggleState = LightingManager::getInstance().gettoggleLightingPreset();
 
-    //if (currentToggleState != lastToggleState) {
-    //    if (currentToggleState) {
-    //        // 切换到预设 2
-    //        //黄调
-    //        LightingManager::getInstance().setLightDirection(glm::vec3(-1.0f, 1.0f, 0.0f));
-    //        LightingManager::getInstance().setLightColor(glm::vec3(1.0f, 0.5f, 0.0f));
-    //        LightingManager::getInstance().setSmoothness(10.0);
-    //    }
-    //    else {
-    //        // 切换到预设 1
-    //        //蓝调
-    //        LightingManager::getInstance().setLightDirection(glm::vec3(1.0f, -1.0f, 0.0f));
-    //        LightingManager::getInstance().setLightColor(glm::vec3(0.0f, 1.0f, 1.0f));
-    //        LightingManager::getInstance().setSmoothness(5.0);
-    //    }
-    //    lastToggleState = currentToggleState; // 更新状态
-    //}
-
     GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
     GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
+    //fog
+    // 获取雾相关参数的 Uniform 位置
+    GLint fogColorLoc = glGetUniformLocation(shaderProgram_use, "fogColor");
+    GLint fogDensityLoc = glGetUniformLocation(shaderProgram_use, "fogDensity");
+    GLint fogHeightStartLoc = glGetUniformLocation(shaderProgram_use, "fogHeightStart");
+    GLint fogHeightEndLoc = glGetUniformLocation(shaderProgram_use, "fogHeightEnd");
+    GLint fogDistanceStartLoc = glGetUniformLocation(shaderProgram_use, "fogDistanceStart");
+    GLint fogDistanceEndLoc = glGetUniformLocation(shaderProgram_use, "fogDistanceEnd");
+
+    // 获取 LightingManager 的实例
+    const LightingManager& lightingManager = LightingManager::getInstance();
+    const FogSettings& fogSettings = lightingManager.getFogSettings();
+
+    // 设置雾效参数
+    glUniform3fv(fogColorLoc, 1, &fogSettings.fogColor[0]);
+    glUniform1f(fogDensityLoc, fogSettings.fogDensity);
+    glUniform1f(fogHeightStartLoc, fogSettings.fogHeightStart);
+    glUniform1f(fogHeightEndLoc, fogSettings.fogHeightEnd);
+    glUniform1f(fogDistanceStartLoc, fogSettings.fogDistanceStart);
+    glUniform1f(fogDistanceEndLoc, fogSettings.fogDistanceEnd);
 
     // 设置光照方向、光照颜色和 smooth 值
     glUniform3fv(lightDirLoc, 1, &LightingManager::getInstance().getLightDirection()[0]);

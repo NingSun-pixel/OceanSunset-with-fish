@@ -5,10 +5,12 @@
 #include <glm/glm.hpp>
 
 struct FogSettings {
-    glm::vec3 fogColor = glm::vec3(0.5f, 0.5f, 0.5f);
+    glm::vec3 fogColor = glm::vec3(0.8f, 0.4f, 0.2f);
     float fogDensity = 0.05f;
     float fogHeightStart = 10.0f;
     float fogHeightEnd = 50.0f;
+    float fogDistanceStart = 30.0f;
+    float fogDistanceEnd = 100.0f;
 };
 
 class LightingManager {
@@ -21,6 +23,7 @@ private:
         targetLightDirection(lightDirection),
         targetLightColor(lightColor),
         targetSmoothness(smoothness),
+        targetFogColor(fogSettings.fogColor),
         transitionProgress(0.0f),
         transitionDuration(15.0f),
         isTransitioning(false),
@@ -36,6 +39,8 @@ private:
     glm::vec3 targetLightDirection;
     glm::vec3 targetLightColor;
     glm::float64 targetSmoothness;
+
+    glm::vec3 targetFogColor;
 
     float transitionProgress;
     float transitionDuration;
@@ -70,11 +75,13 @@ public:
                 targetLightDirection = glm::vec3(-1.0f, 1.0f, 0.0f);
                 targetLightColor = glm::vec3(1.0f, 0.2f, 0.0f);
                 targetSmoothness = 15.0;
+                targetFogColor = glm::vec3(0.8f, 0.4f, 0.2f);
             }
             else {
                 targetLightDirection = glm::vec3(-0.55f, -0.55f, -0.66f);
                 targetLightColor = glm::vec3(0.2f, 1.0f, 1.0f);
                 targetSmoothness = 8.0;
+                targetFogColor = glm::vec3(0.25f, 0.5f, 0.5f);
             }
         }
     }
@@ -124,6 +131,8 @@ public:
             lightDirection = glm::mix(lightDirection, targetLightDirection, transitionProgress);
             lightColor = glm::mix(lightColor, targetLightColor, transitionProgress);
             smoothness = glm::mix(smoothness, targetSmoothness, transitionProgress);
+            fogSettings.fogColor = glm::mix(fogSettings.fogColor, targetFogColor, transitionProgress);
+
         }
     }
 };
