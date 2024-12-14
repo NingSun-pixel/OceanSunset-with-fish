@@ -603,7 +603,7 @@ int main(int argc, char** argv) {
     fishSimulation->loadFishModel(fbxfishFiles[0]);
 
     std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_4");
-    loadModels(fbxFiles);
+    //loadModels(fbxFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象

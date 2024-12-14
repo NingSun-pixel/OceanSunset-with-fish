@@ -41,7 +41,7 @@ void main() {
         vec4(0.0, 0.0, instanceScale.z, 0.0),
         vec4(0.0, 0.0, 0.0, 1.0)
     );
-
+      
     // ƽ�Ʊ任
     mat4 translationMatrix = mat4(
         vec4(1.0, 0.0, 0.0, 0.0),

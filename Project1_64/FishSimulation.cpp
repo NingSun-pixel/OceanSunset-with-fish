@@ -118,12 +118,17 @@ void FishSimulation::loadFishModel(const std::string& modelPath) {
 void FishSimulation::updateFish(float deltaTime) {
     static float time = 0.0f;
     static int currentChunk = 0;       // 当前处理的分区
-    const int chunkSize = 100;         // 每次更新的鱼数量
+    const int chunkSize = 200;         // 每次更新的鱼数量
     const float minSpeed = 0.5f;       // 最小速度
     const float floatAmplitude = 2.0f; // 上下浮动的幅度
     const float floatFrequency = 1.0f; // 上下浮动的频率
     const float expansionFactor = 2.0f; // 聚集区域半径扩大倍数
+    static bool wasLightTriggered = false; // 用于检测布尔值的变化
     time += deltaTime;
+
+    // 获取 LightingManager 实例和布尔值
+    LightingManager& lightingManager = LightingManager::getInstance();
+    bool lightTriggered = lightingManager.gettoggleLightingPreset(); // 假设有此方法
 
     int start = currentChunk * chunkSize;
     int end = std::min(start + chunkSize, numInstances);
@@ -131,44 +136,67 @@ void FishSimulation::updateFish(float deltaTime) {
     for (int i = start; i < end; ++i) {
         auto& fish = instances[i];
 
-        glm::vec3 randomAcceleration = glm::vec3(
-            randomFloat(-0.3f, 0.3f),
-            randomFloat(-0.3f, 0.3f),
-            randomFloat(-0.3f, 0.3f)
-        );
+        if (lightTriggered) {
 
-        glm::vec3 closestCenter = centers[0];
-        float minDistance = glm::length(fish.position - centers[0]);
-        for (const auto& center : centers) {
-            float distance = glm::length(fish.position - center);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestCenter = center;
+            cout << "执行轴旋转" << endl;
+            // 转换为围绕 x=0, z=0 的轴旋转，并向轴聚集
+            glm::vec3 targetAxis = glm::vec3(0.0f, fish.position.y, 0.0f); // x=0, z=0 轴
+            glm::vec3 directionToAxis = glm::normalize(targetAxis - fish.position);
+
+            // 聚集力：趋向于靠近轴
+            glm::vec3 attractionForce = directionToAxis * 0.5f; // 聚集力权重
+
+            // 圆周运动力：围绕轴旋转
+            glm::vec3 tangent = glm::cross(directionToAxis, glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::vec3 rotationalForce = tangent * 2.0f; // 旋转速度权重
+
+            // 综合运动
+            fish.velocity = glm::lerp(fish.velocity, attractionForce + rotationalForce, 0.5f);
+
+            // 更新位置
+            fish.position += fish.velocity * deltaTime * 10.0f;
+        }
+        else {
+            // 正常聚集逻辑
+            glm::vec3 randomAcceleration = glm::vec3(
+                randomFloat(-0.3f, 0.3f),
+                randomFloat(-0.3f, 0.3f),
+                randomFloat(-0.3f, 0.3f)
+            );
+
+            glm::vec3 closestCenter = centers[0];
+            float minDistance = glm::length(fish.position - centers[0]);
+            for (const auto& center : centers) {
+                float distance = glm::length(fish.position - center);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestCenter = center;
+                }
             }
+
+            // 扩大聚集区域的半径
+            float expandedRadius = minDistance * expansionFactor;
+
+            // 计算聚集力
+            glm::vec3 directionToCenter = glm::normalize(closestCenter - fish.position);
+            glm::vec3 attractionForce = directionToCenter * glm::clamp(expandedRadius / 15.0f, 0.0f, 1.0f); // 聚集力随扩展距离减弱
+
+            // 更新速度
+            fish.velocity = glm::lerp(fish.velocity, attractionForce, 0.5f);
+            fish.velocity += randomAcceleration * deltaTime * 0.8f; // 增加速度扰动
+
+            // 加入上下浮动效果
+            float individualOffset = static_cast<float>(i) * 0.2f; // 为每条鱼添加一个偏移值
+            fish.velocity.y += floatAmplitude * sin(floatFrequency * time + individualOffset);
+
+            // 强制最小速度
+            if (glm::length(fish.velocity) < minSpeed) {
+                fish.velocity += glm::normalize(fish.velocity) * (minSpeed - glm::length(fish.velocity));
+            }
+
+            // 更新位置
+            fish.position += fish.velocity * deltaTime;
         }
-
-        // 扩大聚集区域的半径
-        float expandedRadius = minDistance * expansionFactor;
-
-        // 计算聚集力
-        glm::vec3 directionToCenter = glm::normalize(closestCenter - fish.position);
-        glm::vec3 attractionForce = directionToCenter * glm::clamp(expandedRadius / 15.0f, 0.0f, 1.0f); // 聚集力随扩展距离减弱
-
-        // 更新速度
-        fish.velocity = glm::lerp(fish.velocity, attractionForce, 0.5f);
-        fish.velocity += randomAcceleration * deltaTime * 0.8f; // 增加速度扰动
-
-        // 加入上下浮动效果
-        float individualOffset = static_cast<float>(i) * 0.2f; // 为每条鱼添加一个偏移值
-        fish.velocity.y += floatAmplitude * sin(floatFrequency * time + individualOffset);
-
-        // 强制最小速度
-        if (glm::length(fish.velocity) < minSpeed) {
-            fish.velocity += glm::normalize(fish.velocity) * (minSpeed - glm::length(fish.velocity));
-        }
-
-        // 更新位置
-        fish.position += fish.velocity * deltaTime;
 
         // 边界反弹逻辑
         if (fish.position.x > 30.0f * expansionFactor || fish.position.x < -30.0f * expansionFactor) fish.velocity.x *= -1.0f;
@@ -183,8 +211,10 @@ void FishSimulation::updateFish(float deltaTime) {
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
     glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(FishInstance), (end - start) * sizeof(FishInstance), &instances[start]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
 
+    // 更新布尔值状态
+    wasLightTriggered = lightTriggered;
+}
 
 // 渲染鱼群
 void FishSimulation::renderFish(GLuint shaderProgram) {
