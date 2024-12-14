@@ -1,5 +1,7 @@
 #include "FishSimulation.h"
 #include <random>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/compatibility.hpp> // For glm::lerp
 
 // 辅助函数：生成随机数
 float randomFloat(float min, float max) {
@@ -17,30 +19,40 @@ FishSimulation::~FishSimulation() {
     glDeleteBuffers(1, &instanceVBO);
 }
 
-// 初始化鱼群实例
 void FishSimulation::initFishInstances() {
     instances.resize(numInstances);
+
+    // 初始化多中心点
+    centers = {
+        glm::vec3(-15.0f, 10.0f, -15.0f),
+        glm::vec3(15.0f, 15.0f, 15.0f),
+        glm::vec3(-20.0f, 20.0f, 20.0f)
+    };
+
+    int numCenters = centers.size();
+
     for (int i = 0; i < numInstances; ++i) {
+        // 随机分配到某个中心点
+        glm::vec3 center = centers[i % numCenters];
+
+        // 增加更大的随机偏移量以减少过于密集的效果
         instances[i].position = glm::vec3(
-            randomFloat(-20.0f, 20.0f),
-            randomFloat(0.0f, 20.0f),
-            randomFloat(-20.0f, 20.0f)
+            randomFloat(center.x - 10.0f, center.x + 10.0f), // 扩大范围到 [-10, 10]
+            randomFloat(center.y - 5.0f, center.y + 5.0f),   // 高度范围 [-5, 5]
+            randomFloat(center.z - 10.0f, center.z + 10.0f)  // 扩大范围到 [-10, 10]
         );
+
+        // 增加随机速度
         instances[i].velocity = glm::vec3(
-            randomFloat(-0.5f, 0.5f),
-            randomFloat(-0.5f, 0.5f),
-            randomFloat(-0.5f, 0.5f)
+            randomFloat(-0.3f, 0.3f),  // 调低初始速度
+            randomFloat(-0.3f, 0.3f),
+            randomFloat(-0.3f, 0.3f)
         );
+
+        // 保持适当的缩放范围
         instances[i].scale = glm::vec3(randomFloat(0.8f, 1.2f));
         instances[i].rotation = randomFloat(-30.0f, 30.0f);
     }
-
-        // 初始化多中心点
-    centers = {
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(20.0f, 10.0f, 20.0f),
-        glm::vec3(-20.0f, -10.0f, -20.0f)
-    };
 
     // 创建实例化缓冲区
     glGenBuffers(1, &instanceVBO);
@@ -49,9 +61,10 @@ void FishSimulation::initFishInstances() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+
 // 加载鱼模型
 void FishSimulation::loadFishModel(const std::string& modelPath) {
-    loadSingleModel(modelPath,fishModel); // 使用模型加载器
+    loadSingleModel(modelPath, fishModel); // 使用模型加载器
     if (fishModel.vertices.empty()) {
         std::cerr << "Failed to load fish model!" << std::endl;
         return;
@@ -102,21 +115,76 @@ void FishSimulation::loadFishModel(const std::string& modelPath) {
     glBindVertexArray(0);
 }
 
-
-
-// 更新鱼群实例
 void FishSimulation::updateFish(float deltaTime) {
-    for (auto& fish : instances) {
+    static float time = 0.0f;
+    static int currentChunk = 0;       // 当前处理的分区
+    const int chunkSize = 100;         // 每次更新的鱼数量
+    const float minSpeed = 0.5f;       // 最小速度
+    const float floatAmplitude = 2.0f; // 上下浮动的幅度
+    const float floatFrequency = 1.0f; // 上下浮动的频率
+    const float expansionFactor = 2.0f; // 聚集区域半径扩大倍数
+    time += deltaTime;
+
+    int start = currentChunk * chunkSize;
+    int end = std::min(start + chunkSize, numInstances);
+
+    for (int i = start; i < end; ++i) {
+        auto& fish = instances[i];
+
+        glm::vec3 randomAcceleration = glm::vec3(
+            randomFloat(-0.3f, 0.3f),
+            randomFloat(-0.3f, 0.3f),
+            randomFloat(-0.3f, 0.3f)
+        );
+
+        glm::vec3 closestCenter = centers[0];
+        float minDistance = glm::length(fish.position - centers[0]);
+        for (const auto& center : centers) {
+            float distance = glm::length(fish.position - center);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCenter = center;
+            }
+        }
+
+        // 扩大聚集区域的半径
+        float expandedRadius = minDistance * expansionFactor;
+
+        // 计算聚集力
+        glm::vec3 directionToCenter = glm::normalize(closestCenter - fish.position);
+        glm::vec3 attractionForce = directionToCenter * glm::clamp(expandedRadius / 15.0f, 0.0f, 1.0f); // 聚集力随扩展距离减弱
+
+        // 更新速度
+        fish.velocity = glm::lerp(fish.velocity, attractionForce, 0.5f);
+        fish.velocity += randomAcceleration * deltaTime * 0.8f; // 增加速度扰动
+
+        // 加入上下浮动效果
+        float individualOffset = static_cast<float>(i) * 0.2f; // 为每条鱼添加一个偏移值
+        fish.velocity.y += floatAmplitude * sin(floatFrequency * time + individualOffset);
+
+        // 强制最小速度
+        if (glm::length(fish.velocity) < minSpeed) {
+            fish.velocity += glm::normalize(fish.velocity) * (minSpeed - glm::length(fish.velocity));
+        }
+
+        // 更新位置
         fish.position += fish.velocity * deltaTime;
-        if (fish.position.x > 10.0f || fish.position.x < -10.0f) fish.velocity.x *= -1.0f;
-        if (fish.position.y > 5.0f || fish.position.y < -5.0f) fish.velocity.y *= -1.0f;
-        if (fish.position.z > 10.0f || fish.position.z < -10.0f) fish.velocity.z *= -1.0f;
+
+        // 边界反弹逻辑
+        if (fish.position.x > 30.0f * expansionFactor || fish.position.x < -30.0f * expansionFactor) fish.velocity.x *= -1.0f;
+        if (fish.position.y > 25.0f * expansionFactor || fish.position.y < 0.0f) fish.velocity.y *= -1.0f;
+        if (fish.position.z > 30.0f * expansionFactor || fish.position.z < -30.0f * expansionFactor) fish.velocity.z *= -1.0f;
     }
 
+    // 更新区域索引
+    currentChunk = (currentChunk + 1) % ((numInstances + chunkSize - 1) / chunkSize);
+
+    // 更新实例缓冲区
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, instances.size() * sizeof(FishInstance), instances.data());
+    glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(FishInstance), (end - start) * sizeof(FishInstance), &instances[start]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
 
 // 渲染鱼群
 void FishSimulation::renderFish(GLuint shaderProgram) {
