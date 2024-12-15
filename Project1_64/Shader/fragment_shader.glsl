@@ -155,7 +155,7 @@ void main()
     vec3 diffuse = kD * albedo / 3.14159265359;
 
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.1;
 
     // 遍历所有点光源
     for (int i = 0; i < numPointLights; i++) {

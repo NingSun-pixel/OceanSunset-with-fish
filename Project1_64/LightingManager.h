@@ -73,7 +73,7 @@ public:
 
             if (value) {
                 targetLightDirection = glm::vec3(-1.0f, -0.28f, 0.08f);
-                targetLightColor = glm::vec3(1.0f, 0.2f, 0.0f);
+                targetLightColor = glm::vec3(1.0f, 0.2f, 0.1f);
                 targetSmoothness = 15.0;
                 targetFogColor = glm::vec3(0.8f, 0.4f, 0.2f);
             }
