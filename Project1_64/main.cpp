@@ -12,7 +12,7 @@
 
 FishSimulation* fishSimulation;
 
-Camera camera(glm::vec3(0.0f, 10.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
+Camera camera(glm::vec3(32.5f, 14.0f, -32.3f), glm::vec3(0.0f, 1.0f, 0.0f), 135.5f, -16.3f, 45.0f);
 float lastFrame = 0.0f;
 
 // 定义骨骼结构
@@ -353,6 +353,9 @@ std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
 
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    std::cout <<"camera.position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
+    std::cout << "camera.front:"<< camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
+    std::cout << " camera.up:" << camera.up.x << " " << camera.up.y << " " << camera.up.z << endl;
 
     // 更新光照参数
     // 获取相机的视图和投影矩阵

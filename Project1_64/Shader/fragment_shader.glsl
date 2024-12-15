@@ -128,9 +128,30 @@ void calculateVoronoi(in vec2 UV, in float angleOffset, in float cellDensity, ou
     outCell = result.y;
 }
 
+float calculateFogFactor(float height, float fogStart, float fogEnd, float density)
+{
+    if (height < fogStart) return 1.0;  
+    if (height > fogEnd) return 0.0;    
+
+    float t = (fogEnd - height) / (fogEnd - fogStart); 
+    return t;        
+}
+
+float calculateDistanceFogFactor(float distance, float fogStart, float fogEnd)
+{
+    if (distance < fogStart) return 0.0;
+    if (distance > fogEnd) return 1.0;
+
+    float t = (distance - fogStart) / (fogEnd - fogStart);
+    return t;
+}
+
 void main()
 {
-    vec3 albedo = texture(albedoMap, TexCoords).rgb;
+    vec4 albedoTex = texture(albedoMap, TexCoords);
+    vec3 albedo = albedoTex.rgb;
+    if (albedoTex.a - 0.5 < 0.0)
+        discard;
     vec3 N = calculateNormal();
     vec3 V = normalize(viewPos - FragPos);
     vec3 L = normalize(-lightDirection);
@@ -189,9 +210,21 @@ void main()
     vec3 causticColor = vec3(causticStrength, causticStrength, causticStrength) * mix(grayColor,lightColor,0.8f);
     color += causticColor;
 
+    float height = FragPos.z;
+    float heightFogFactor = calculateFogFactor(height, fogHeightStart, fogHeightEnd, fogDensity);
+
+    float distance = length(viewPos - FragPos);
+    float distanceFogFactor = calculateDistanceFogFactor(distance, fogDistanceStart, fogDistanceEnd);
+    float combinedFogFactor = heightFogFactor * distanceFogFactor;
+
+
     // 伽马校正
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
+    
+    // Mix fog color and final color
+    //雾效在校色后
+    color = mix(color, fogColor, combinedFogFactor);
 
     FragColor = vec4(color, 1.0);
 }
