@@ -16,6 +16,7 @@ struct FishInstance {
     glm::vec3 velocity;
     glm::vec3 scale;
     float rotation;
+    glm::vec4 color; // 新增的颜色属性
 };
 
 class FishSimulation {

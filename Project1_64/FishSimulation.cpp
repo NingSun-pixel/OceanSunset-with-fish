@@ -52,6 +52,15 @@ void FishSimulation::initFishInstances() {
         // 保持适当的缩放范围
         instances[i].scale = glm::vec3(randomFloat(0.8f, 1.2f));
         instances[i].rotation = randomFloat(-30.0f, 30.0f);
+
+
+        // 随机生成颜色 (RGBA)
+        instances[i].color = glm::vec4(
+            randomFloat(0.2f, 1.0f), // 红色分量
+            randomFloat(0.2f, 1.0f), // 绿色分量
+            randomFloat(0.2f, 1.0f), // 蓝色分量
+            1.0f                     // Alpha 不透明
+        );
     }
 
     // 创建实例化缓冲区
@@ -111,6 +120,10 @@ void FishSimulation::loadFishModel(const std::string& modelPath) {
     glVertexAttribPointer(7, 1, GL_FLOAT, GL_FALSE, sizeof(FishInstance), (void*)offsetof(FishInstance, rotation));
     glEnableVertexAttribArray(7);
     glVertexAttribDivisor(7, 1);
+
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(FishInstance), (void*)offsetof(FishInstance, color));
+    glEnableVertexAttribArray(8);
+    glVertexAttribDivisor(8, 1); // 每个实例使用一个颜色
 
     glBindVertexArray(0);
 }
