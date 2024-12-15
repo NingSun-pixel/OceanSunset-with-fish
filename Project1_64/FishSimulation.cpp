@@ -151,7 +151,6 @@ void FishSimulation::updateFish(float deltaTime) {
 
         if (lightTriggered) {
 
-            cout << "执行轴旋转" << endl;
             // 转换为围绕 x=0, z=0 的轴旋转，并向轴聚集
             glm::vec3 targetAxis = glm::vec3(0.0f, fish.position.y, 0.0f); // x=0, z=0 轴
             glm::vec3 directionToAxis = glm::normalize(targetAxis - fish.position);

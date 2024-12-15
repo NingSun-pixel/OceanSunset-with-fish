@@ -3,6 +3,7 @@
 in vec2 TexCoords;
 in vec3 FragPos;
 in vec3 Normal;
+//in vec3 vertColor;
 out vec4 FragColor;
 
 // Uniforms for directional light
@@ -28,12 +29,14 @@ uniform float roughness;
 uniform float ambientOcclusion;
 
 // Point light parameters
-#define MAX_POINT_LIGHTS 8
+#define MAX_POINT_LIGHTS 4
 uniform vec3 pointLightPositions[MAX_POINT_LIGHTS];
 uniform vec3 pointLightColors[MAX_POINT_LIGHTS];
 uniform float pointLightIntensities[MAX_POINT_LIGHTS];
 uniform float pointLightRadii[MAX_POINT_LIGHTS];
 uniform int numPointLights;
+
+uniform float uTime;
 
 // Helper functions
 vec3 calculateNormal()
@@ -93,6 +96,38 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+vec2 voronoiRandomVector(vec2 UV, float offset)
+{
+    mat2 m = mat2(15.27, 47.63, 99.41, 89.98);
+    UV = fract(sin(m * UV) * 46839.32);
+    return vec2(sin(UV.y + offset) * 0.5 + 0.5, cos(UV.x * offset) * 0.5 + 0.5);
+}
+
+void calculateVoronoi(in vec2 UV, in float angleOffset, in float cellDensity, out float outDistance, out float outCell)
+{
+    vec2 g = floor(UV * cellDensity);
+    vec2 f = fract(UV * cellDensity);
+    float minDist = 8.0;
+    vec3 result = vec3(8.0, 0.0, 0.0);
+
+    for (int y = -1; y <= 1; y++)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            vec2 lattice = vec2(x, y);
+            vec2 offset = voronoiRandomVector(lattice + g, angleOffset);
+            float d = distance(lattice + offset, f);
+            if (d < minDist)
+            {
+                result = vec3(d, offset.x, offset.y);
+                minDist = d;
+            }
+        }
+    }
+    outDistance = result.x;
+    outCell = result.y;
+}
+
 void main()
 {
     vec3 albedo = texture(albedoMap, TexCoords).rgb;
@@ -141,6 +176,18 @@ void main()
 
         color += pointLight;
     }
+
+    // 焦散效果
+    float voronoiDistance;
+    float voronoiCell;
+    float animatedAngleOffset = uTime; // 动态角度偏移
+    calculateVoronoi(FragPos.xy * 0.05, animatedAngleOffset, 5.0, voronoiDistance, voronoiCell);
+    float gray = (lightColor.r + lightColor.g + lightColor.b) / 3; 
+    vec3 grayColor = vec3(gray, gray, gray);
+    float voronoiDistance2 = voronoiDistance * voronoiDistance * voronoiDistance;
+    float causticStrength = voronoiDistance2 * clamp((40.0f - FragPos.z) / 50.0f,0,1) * (dot(N, L) + 1.0f)/2.0f * 3.0f;
+    vec3 causticColor = vec3(causticStrength, causticStrength, causticStrength) * mix(grayColor,lightColor,0.8f);
+    color += causticColor;
 
     // 伽马校正
     color = color / (color + vec3(1.0));

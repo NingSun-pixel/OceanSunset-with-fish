@@ -363,7 +363,6 @@ void renderScene() {
     LightingManager::getInstance().updateLighting(deltaTime);
 
     // 传递时间变量给顶点着色器
-    glUniform1f(glGetUniformLocation(shaderProgram_use, "uTime"), currentTime);
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 projection = camera.getProjectionMatrix(1920.0f / 1080.0f);  // 假设窗口是800x800
     renderSkybox(skyboxShaderProgram_use, skyboxVAO, cubemapTexture, view, projection);
@@ -372,6 +371,8 @@ void renderScene() {
     //drawing
     // 使用着色器程序
     glUseProgram(shaderProgram_use);
+    glUniform1f(glGetUniformLocation(shaderProgram_use, "uTime"), currentTime);
+
 
     // 光照参数切换逻辑
     static bool lastToggleState = false; // 记录上一次的布尔值状态
@@ -603,7 +604,7 @@ int main(int argc, char** argv) {
     fishSimulation->loadFishModel(fbxfishFiles[0]);
 
     std::vector<std::string> fbxFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/FBX_4");
-    //loadModels(fbxFiles);
+    loadModels(fbxFiles);
 
     glutDisplayFunc(renderScene);
     // 创建 MouseHandler 对象

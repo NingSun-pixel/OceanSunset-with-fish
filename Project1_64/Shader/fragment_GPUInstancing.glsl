@@ -14,6 +14,7 @@ uniform float smoothness;
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
 uniform sampler2D RoughnessMap;
+uniform float deltaTime;
 
 // Fog parameters
 uniform vec3 fogColor;

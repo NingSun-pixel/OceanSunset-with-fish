@@ -72,7 +72,7 @@ public:
             isTransitioning = true;
 
             if (value) {
-                targetLightDirection = glm::vec3(-1.0f, 1.0f, 0.0f);
+                targetLightDirection = glm::vec3(-1.0f, -0.28f, 0.08f);
                 targetLightColor = glm::vec3(1.0f, 0.2f, 0.0f);
                 targetSmoothness = 15.0;
                 targetFogColor = glm::vec3(0.8f, 0.4f, 0.2f);
@@ -80,7 +80,7 @@ public:
             else {
                 targetLightDirection = glm::vec3(-0.55f, -0.55f, -0.66f);
                 targetLightColor = glm::vec3(0.2f, 1.0f, 1.0f);
-                targetSmoothness = 8.0;
+                targetSmoothness = 6.0;
                 targetFogColor = glm::vec3(0.25f, 0.5f, 0.5f);
             }
         }
