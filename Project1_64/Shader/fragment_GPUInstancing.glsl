@@ -172,7 +172,7 @@ void main()
     vec3 diffuse = kD * albedo / 3.14159265359;
 
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.2;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.5f;
 
     // 遍历所有点光源
     for (int i = 0; i < numPointLights; i++) {
@@ -187,9 +187,9 @@ void main()
         float NdotLp = max(dot(N, Lp), 0.0);
 
         vec3 pointDiffuse = kD * albedo / 3.14159265359;
-        //vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
+        //vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / (denominator * distance * distance);
 
-        vec3 pointLight = pointDiffuse * pointLightColor * attenuation * pointLightIntensity * NdotLp;
+        vec3 pointLight = (pointDiffuse) * pointLightColor * attenuation * pointLightIntensity * NdotLp;
 
         color += pointLight;
     }
@@ -209,7 +209,7 @@ void main()
     float height = FragPos.z;
     float heightFogFactor = calculateFogFactor(height, fogHeightStart, fogHeightEnd, fogDensity);
 
-    float distance = length(viewPos - FragPos);
+    float distance = length(viewPos - vec3(FragPos.x, FragPos.z, FragPos.y));
     float distanceFogFactor = calculateDistanceFogFactor(distance, fogDistanceStart, fogDistanceEnd);
     float combinedFogFactor = heightFogFactor * distanceFogFactor;
 

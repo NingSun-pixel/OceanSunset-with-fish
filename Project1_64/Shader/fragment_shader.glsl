@@ -193,9 +193,9 @@ void main()
         vec3 pointDiffuse = kD * albedo / 3.14159265359;
         //vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
 
-        vec3 pointLight = pointDiffuse * pointLightColor * attenuation * pointLightIntensity * NdotLp;
+        vec3 pointLight = (pointDiffuse ) * pointLightColor * attenuation * pointLightIntensity * NdotLp;
 
-        color += pointLight;
+        color += pointLight * 0.5f;
     }
 
     // ½¹É¢Ð§¹û
@@ -207,13 +207,13 @@ void main()
     vec3 grayColor = vec3(gray, gray, gray);
     float voronoiDistance2 = voronoiDistance * voronoiDistance * voronoiDistance;
     float causticStrength = voronoiDistance2 * clamp((40.0f - FragPos.z) / 50.0f,0,1) * (dot(N, L) + 1.0f)/2.0f * 3.0f;
-    vec3 causticColor = vec3(causticStrength, causticStrength, causticStrength) * mix(grayColor,lightColor,0.8f);
+    vec3 causticColor = vec3(causticStrength, causticStrength, causticStrength) * mix(grayColor,lightColor,0.8f) * smoothness/5.0f * clamp(lightColor.b,0.35,1);
     color += causticColor;
 
     float height = FragPos.z;
     float heightFogFactor = calculateFogFactor(height, fogHeightStart, fogHeightEnd, fogDensity);
 
-    float distance = length(viewPos - FragPos);
+    float distance = length(viewPos - vec3(FragPos.x, FragPos.z, FragPos.y));
     float distanceFogFactor = calculateDistanceFogFactor(distance, fogDistanceStart, fogDistanceEnd);
     float combinedFogFactor = heightFogFactor * distanceFogFactor;
 
@@ -227,4 +227,5 @@ void main()
     color = mix(color, fogColor, combinedFogFactor);
 
     FragColor = vec4(color, 1.0);
+
 }

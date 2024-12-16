@@ -16,20 +16,20 @@ struct PointLight {
 
 
 struct FogSettings {
-    glm::vec3 fogColor = glm::vec3(0.8f, 0.4f, 0.2f);
+    glm::vec3 fogColor = glm::vec3(0.27f, 0.44f, 0.47f);
     float fogDensity = 0.05f;
     float fogHeightStart = 10.0f;
     float fogHeightEnd = 50.0f;
-    float fogDistanceStart = 30.0f;
-    float fogDistanceEnd = 100.0f;
+    float fogDistanceStart = 70.0f;
+    float fogDistanceEnd = 180.0f;
 };
 
 class LightingManager {
 private:
     LightingManager()
-        : lightDirection(glm::normalize(glm::vec3(-0.55f, -0.55f, -0.66f))),
-        lightColor(glm::vec3(1.0f, 0.2f, 0.0f)),
-        smoothness(15.0f),
+        : lightDirection(glm::normalize(glm::vec3(0.39f, -0.83f, -0.40f))),
+        lightColor(glm::vec3(0.2f, 0.74f, 1.0f)),
+        smoothness(3.8f),
         toggleLightingPreset(false),
         targetLightDirection(lightDirection),
         targetLightColor(lightColor),
@@ -90,20 +90,25 @@ public:
             if (value) {
                 targetLightDirection = glm::vec3(-1.0f, -0.28f, 0.08f);
                 targetLightColor = glm::vec3(1.0f, 0.2f, 0.1f);
-                targetSmoothness = 15.0;
+                targetSmoothness = 10.0f;
                 targetFogColor = glm::vec3(0.9f, 0.55f, 0.44f);
+                glm::vec3 pointLightColor = glm::vec3(0.6f, 1.0f, 1.0f);
                 clearPointLights();
                 addPointLight(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10, 15);
+                addPointLight(glm::vec3(40.0f, 10.0f, -40.0f), pointLightColor, 10, 15);
+                addPointLight(glm::vec3(-40.0f, 10.0f, 40.0f), pointLightColor, 10, 15);
+
             }
             else {
-                targetLightDirection = glm::vec3(-0.55f, -0.55f, -0.66f);
-                targetLightColor = glm::vec3(0.2f, 1.0f, 1.0f);
-                targetSmoothness = 2.0;
-                targetFogColor = glm::vec3(0.33f, 0.62f, 0.62f);
+                targetLightDirection = glm::vec3(0.39f, -0.83f, -0.40f);
+                targetLightColor = glm::vec3(0.2f, 0.74f, 1.0f);
+                targetSmoothness = 3.8f;
+                targetFogColor = glm::vec3(0.27f, 0.44f, 0.47f);
+                glm::vec3 pointLightColor = glm::vec3(0.6f, 1.0f, 1.0f);
                 clearPointLights();
-                addPointLight(glm::vec3(-15.0f, 10.0f, -15.0f), targetLightColor, 30, 15);
-                addPointLight(glm::vec3(15.0f, 15.0f, 15.0f), targetLightColor, 30, 15);
-                addPointLight(glm::vec3(-20.0f, 20.0f, 20.0f), targetLightColor, 30, 15);
+                addPointLight(glm::vec3(-15.0f, 10.0f, -15.0f), pointLightColor, 30, 15);
+                addPointLight(glm::vec3(15.0f, 15.0f, 15.0f), pointLightColor, 30, 15);
+                addPointLight(glm::vec3(-20.0f, 20.0f, 20.0f), pointLightColor, 30, 15);
             }
         }
     }

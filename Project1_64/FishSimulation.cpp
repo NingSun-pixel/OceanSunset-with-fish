@@ -50,7 +50,7 @@ void FishSimulation::initFishInstances() {
         );
 
         // 保持适当的缩放范围
-        instances[i].scale = glm::vec3(randomFloat(0.8f, 1.2f));
+        instances[i].scale = glm::vec3(randomFloat(1.5f, 2.0f));
         instances[i].rotation = randomFloat(-30.0f, 30.0f);
 
 
