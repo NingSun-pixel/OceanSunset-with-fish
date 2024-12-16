@@ -353,9 +353,9 @@ std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
 
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    std::cout <<"camera.position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
-    std::cout << "camera.front:"<< camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
-    std::cout << " camera.up:" << camera.up.x << " " << camera.up.y << " " << camera.up.z << endl;
+    //std::cout <<"camera.position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
+    //std::cout << "camera.front:"<< camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
+    //std::cout << " camera.up:" << camera.up.x << " " << camera.up.y << " " << camera.up.z << endl;
 
     // 更新光照参数
     // 获取相机的视图和投影矩阵
@@ -384,6 +384,43 @@ void renderScene() {
     GLint lightDirLoc = glGetUniformLocation(shaderProgram_use, "lightDirection");
     GLint lightColorLoc = glGetUniformLocation(shaderProgram_use, "lightColor");
     GLint smoothnessLoc = glGetUniformLocation(shaderProgram_use, "smoothness");
+
+    // 获取点光源参数的 Uniform 位置
+    GLint numPointLightsLoc = glGetUniformLocation(shaderProgram_use, "numPointLights");
+    GLint pointLightPositionsLoc = glGetUniformLocation(shaderProgram_use, "pointLightPositions");
+    GLint pointLightColorsLoc = glGetUniformLocation(shaderProgram_use, "pointLightColors");
+    GLint pointLightIntensitiesLoc = glGetUniformLocation(shaderProgram_use, "pointLightIntensities");
+    GLint pointLightRadiiLoc = glGetUniformLocation(shaderProgram_use, "pointLightRadii");
+
+    // 从 LightingManager 获取点光源数据
+    const std::vector<PointLight>& pointLights = LightingManager::getInstance().getPointLights();
+    int numPointLights = pointLights.size();
+
+    // 设置点光源数量
+    glUniform1i(numPointLightsLoc, numPointLights);
+
+    if (numPointLights > 0) {
+        // 准备点光源数据
+        std::vector<glm::vec3> pointLightPositions(numPointLights);
+        std::vector<glm::vec3> pointLightColors(numPointLights);
+        std::vector<float> pointLightIntensities(numPointLights);
+        std::vector<float> pointLightRadii(numPointLights);
+
+        for (int i = 0; i < numPointLights; ++i) {
+            pointLightPositions[i] = pointLights[i].position;
+            pointLightColors[i] = pointLights[i].color;
+            pointLightIntensities[i] = pointLights[i].intensity;
+            pointLightRadii[i] = pointLights[i].radius;
+        }
+
+        // 传递点光源参数给着色器
+        glUniform3fv(pointLightPositionsLoc, numPointLights, glm::value_ptr(pointLightPositions[0]));
+        glUniform3fv(pointLightColorsLoc, numPointLights, glm::value_ptr(pointLightColors[0]));
+        glUniform1fv(pointLightIntensitiesLoc, numPointLights, pointLightIntensities.data());
+        glUniform1fv(pointLightRadiiLoc, numPointLights, pointLightRadii.data());
+    }
+
+
     //fog
     // 获取雾相关参数的 Uniform 位置
     GLint fogColorLoc = glGetUniformLocation(shaderProgram_use, "fogColor");
@@ -571,12 +608,66 @@ void initOpenGLAndAntTweakBar() {
         },
         nullptr, "label='Toggle Lighting Preset' help='Switch between two lighting presets'");
 
+    LightingManager::getInstance().addPointLight(glm::vec3(-15.0f, 10.0f, -15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10, 15);
+
+    //// 动态控制点光源的第一个光源 (示例，扩展可遍历所有点光源)
+    //if (!LightingManager::getInstance().getPointLights().empty()) {
+    //    TwAddVarCB(bar, "Point Light Position", TW_TYPE_DIR3F,
+    //        [](const void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) lights[0].position = *static_cast<const glm::vec3*>(value);
+    //        },
+    //        [](void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) *static_cast<glm::vec3*>(value) = lights[0].position;
+    //        },
+    //        nullptr, "label='Position' help='Modify position of the first point light'");
+
+    //    TwAddVarCB(bar, "Point Light Color", TW_TYPE_COLOR3F,
+    //        [](const void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) lights[0].color = *static_cast<const glm::vec3*>(value);
+    //        },
+    //        [](void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) *static_cast<glm::vec3*>(value) = lights[0].color;
+    //        },
+    //        nullptr, "label='Color' help='Modify color of the first point light'");
+
+    //    TwAddVarCB(bar, "Point Light Intensity", TW_TYPE_FLOAT,
+    //        [](const void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) 
+    //                lights[0].intensity = *static_cast<const float*>(value);
+    //        },
+    //        [](void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) *static_cast<float*>(value) = lights[0].intensity;
+    //        },
+    //        nullptr, "label='Intensity' min=0 max=10 step=0.1 help='Adjust intensity of the first point light'");
+
+    //    TwAddVarCB(bar, "Point Light Radius", TW_TYPE_FLOAT,
+    //        [](const void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) 
+    //                lights[0].radius = *static_cast<const float*>(value);
+    //        },
+    //        [](void* value, void* clientData) {
+    //            auto& lights = LightingManager::getInstance().getPointLights();
+    //            if (!lights.empty()) 
+    //                *static_cast<float*>(value) = lights[0].radius;
+    //        },
+    //        nullptr, "label='Radius' min=0 max=100 step=1 help='Adjust radius of the first point light'");
+    //}
+
     // 设置 Tweak Bar 的位置和大小
     int position[] = { windowWidth - barWidth, windowHeight - barHeight };
     TwSetParam(bar, NULL, "position", TW_PARAM_INT32, 2, position);
 
     int size[] = { barWidth, barHeight };
     TwSetParam(bar, NULL, "size", TW_PARAM_INT32, 2, size);
+
+
 }
 
 

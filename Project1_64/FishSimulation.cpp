@@ -237,6 +237,42 @@ void FishSimulation::renderFish(GLuint shaderProgram) {
     GLint GPUlightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
     GLint GPUsmoothnessLoc = glGetUniformLocation(shaderProgram, "smoothness");
 
+    // 获取点光源参数的 Uniform 位置
+    GLint numPointLightsLoc = glGetUniformLocation(shaderProgram, "numPointLights");
+    GLint pointLightPositionsLoc = glGetUniformLocation(shaderProgram, "pointLightPositions");
+    GLint pointLightColorsLoc = glGetUniformLocation(shaderProgram, "pointLightColors");
+    GLint pointLightIntensitiesLoc = glGetUniformLocation(shaderProgram, "pointLightIntensities");
+    GLint pointLightRadiiLoc = glGetUniformLocation(shaderProgram, "pointLightRadii");
+
+    // 从 LightingManager 获取点光源数据
+    const std::vector<PointLight>& pointLights = LightingManager::getInstance().getPointLights();
+    int numPointLights = pointLights.size();
+
+    // 设置点光源数量
+    glUniform1i(numPointLightsLoc, numPointLights);
+
+    if (numPointLights > 0) {
+        // 准备点光源数据
+        std::vector<glm::vec3> pointLightPositions(numPointLights);
+        std::vector<glm::vec3> pointLightColors(numPointLights);
+        std::vector<float> pointLightIntensities(numPointLights);
+        std::vector<float> pointLightRadii(numPointLights);
+
+        for (int i = 0; i < numPointLights; ++i) {
+            pointLightPositions[i] = pointLights[i].position;
+            pointLightColors[i] = pointLights[i].color;
+            pointLightIntensities[i] = pointLights[i].intensity;
+            pointLightRadii[i] = pointLights[i].radius;
+        }
+
+        // 传递点光源参数给着色器
+        glUniform3fv(pointLightPositionsLoc, numPointLights, glm::value_ptr(pointLightPositions[0]));
+        glUniform3fv(pointLightColorsLoc, numPointLights, glm::value_ptr(pointLightColors[0]));
+        glUniform1fv(pointLightIntensitiesLoc, numPointLights, pointLightIntensities.data());
+        glUniform1fv(pointLightRadiiLoc, numPointLights, pointLightRadii.data());
+    }
+
+
     // 获取雾相关参数的 Uniform 位置
     GLint fogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
     GLint fogDensityLoc = glGetUniformLocation(shaderProgram, "fogDensity");

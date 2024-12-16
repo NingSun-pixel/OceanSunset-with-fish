@@ -95,6 +95,56 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
+vec2 voronoiRandomVector(vec2 UV, float offset)
+{
+    mat2 m = mat2(15.27, 47.63, 99.41, 89.98);
+    UV = fract(sin(m * UV) * 46839.32);
+    return vec2(sin(UV.y + offset) * 0.5 + 0.5, cos(UV.x * offset) * 0.5 + 0.5);
+}
+
+void calculateVoronoi(in vec2 UV, in float angleOffset, in float cellDensity, out float outDistance, out float outCell)
+{
+    vec2 g = floor(UV * cellDensity);
+    vec2 f = fract(UV * cellDensity);
+    float minDist = 8.0;
+    vec3 result = vec3(8.0, 0.0, 0.0);
+
+    for (int y = -1; y <= 1; y++)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            vec2 lattice = vec2(x, y);
+            vec2 offset = voronoiRandomVector(lattice + g, angleOffset);
+            float d = distance(lattice + offset, f);
+            if (d < minDist)
+            {
+                result = vec3(d, offset.x, offset.y);
+                minDist = d;
+            }
+        }
+    }
+    outDistance = result.x;
+    outCell = result.y;
+}
+
+float calculateFogFactor(float height, float fogStart, float fogEnd, float density)
+{
+    if (height < fogStart) return 1.0;
+    if (height > fogEnd) return 0.0;
+
+    float t = (fogEnd - height) / (fogEnd - fogStart);
+    return t;
+}
+
+float calculateDistanceFogFactor(float distance, float fogStart, float fogEnd)
+{
+    if (distance < fogStart) return 0.0;
+    if (distance > fogEnd) return 1.0;
+
+    float t = (distance - fogStart) / (fogEnd - fogStart);
+    return t;
+}
+
 void main()
 {
     vec3 albedo = texture(albedoMap, TexCoords).rgb * TofragColor.rgb;
@@ -122,7 +172,7 @@ void main()
     vec3 diffuse = kD * albedo / 3.14159265359;
 
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.05;
+    vec3 color = ambient + (diffuse + specular) * lightColor * NdotL * smoothness + albedo * 0.2;
 
     // 遍历所有点光源
     for (int i = 0; i < numPointLights; i++) {
@@ -137,16 +187,40 @@ void main()
         float NdotLp = max(dot(N, Lp), 0.0);
 
         vec3 pointDiffuse = kD * albedo / 3.14159265359;
-        vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
+        //vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
 
-        vec3 pointLight = (pointDiffuse + pointSpecular) * pointLightColor * attenuation * pointLightIntensity * NdotLp;
+        vec3 pointLight = pointDiffuse * pointLightColor * attenuation * pointLightIntensity * NdotLp;
 
         color += pointLight;
     }
 
+    // 焦散效果
+    float voronoiDistance;
+    float voronoiCell;
+    float animatedAngleOffset = deltaTime; // 动态角度偏移
+    calculateVoronoi(FragPos.xy * 0.05, animatedAngleOffset, 5.0, voronoiDistance, voronoiCell);
+    float gray = (lightColor.r + lightColor.g + lightColor.b) / 3;
+    vec3 grayColor = vec3(gray, gray, gray);
+    float voronoiDistance2 = voronoiDistance * voronoiDistance * voronoiDistance;
+    float causticStrength = voronoiDistance2 * clamp((40.0f - FragPos.z) / 50.0f, 0, 1) * (dot(N, L) + 1.0f) / 2.0f * 3.0f;
+    vec3 causticColor = vec3(causticStrength, causticStrength, causticStrength) * mix(grayColor, lightColor, 0.8f);
+    color += causticColor;
+
+    float height = FragPos.z;
+    float heightFogFactor = calculateFogFactor(height, fogHeightStart, fogHeightEnd, fogDensity);
+
+    float distance = length(viewPos - FragPos);
+    float distanceFogFactor = calculateDistanceFogFactor(distance, fogDistanceStart, fogDistanceEnd);
+    float combinedFogFactor = heightFogFactor * distanceFogFactor;
+
+
     // 伽马校正
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));
+
+    // Mix fog color and final color
+    //雾效在校色后
+    color = mix(color, fogColor, combinedFogFactor);
 
     FragColor = vec4(color, 1.0);
 }

@@ -191,9 +191,9 @@ void main()
         float NdotLp = max(dot(N, Lp), 0.0);
 
         vec3 pointDiffuse = kD * albedo / 3.14159265359;
-        vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
+        //vec3 pointSpecular = (NDF * GeometrySmith(N, V, Lp, Roughness_Tex) * fresnelSchlick(max(dot(H, V), 0.0), F0)) / denominator;
 
-        vec3 pointLight = (pointDiffuse + pointSpecular) * pointLightColor * attenuation * pointLightIntensity * NdotLp;
+        vec3 pointLight = pointDiffuse * pointLightColor * attenuation * pointLightIntensity * NdotLp;
 
         color += pointLight;
     }

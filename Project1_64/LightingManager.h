@@ -4,13 +4,24 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#define MAX_POINT_LIGHTS 4
+
+struct PointLight {
+    glm::vec3 position;
+    glm::vec3 color;
+    float intensity;
+    float radius;
+};
+
+
+
 struct FogSettings {
     glm::vec3 fogColor = glm::vec3(0.8f, 0.4f, 0.2f);
     float fogDensity = 0.05f;
     float fogHeightStart = 10.0f;
     float fogHeightEnd = 50.0f;
-    float fogDistanceStart = 50.0f;
-    float fogDistanceEnd = 200.0f;
+    float fogDistanceStart = 30.0f;
+    float fogDistanceEnd = 100.0f;
 };
 
 class LightingManager {
@@ -49,7 +60,10 @@ private:
 
     FogSettings fogSettings; // 新增雾设置
 
+
 public:
+    std::vector<PointLight> pointLights; // 点光源
+
     static LightingManager& getInstance() {
         static LightingManager instance;
         return instance;
@@ -58,6 +72,8 @@ public:
     // Getter 和 Setter
     const glm::vec3& getLightDirection() const { return lightDirection; }
     const glm::vec3& getLightColor() const { return lightColor; }
+    // 获取点光源的可修改引用
+    std::vector<PointLight>& getPointLights() { return pointLights; }
     glm::float64 getSmoothness() const { return smoothness; }
 
     bool gettoggleLightingPreset() const { return toggleLightingPreset; }
@@ -76,12 +92,18 @@ public:
                 targetLightColor = glm::vec3(1.0f, 0.2f, 0.1f);
                 targetSmoothness = 15.0;
                 targetFogColor = glm::vec3(0.9f, 0.55f, 0.44f);
+                clearPointLights();
+                addPointLight(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 10, 15);
             }
             else {
                 targetLightDirection = glm::vec3(-0.55f, -0.55f, -0.66f);
                 targetLightColor = glm::vec3(0.2f, 1.0f, 1.0f);
-                targetSmoothness = 6.0;
+                targetSmoothness = 2.0;
                 targetFogColor = glm::vec3(0.33f, 0.62f, 0.62f);
+                clearPointLights();
+                addPointLight(glm::vec3(-15.0f, 10.0f, -15.0f), targetLightColor, 30, 15);
+                addPointLight(glm::vec3(15.0f, 15.0f, 15.0f), targetLightColor, 30, 15);
+                addPointLight(glm::vec3(-20.0f, 20.0f, 20.0f), targetLightColor, 30, 15);
             }
         }
     }
@@ -109,6 +131,20 @@ public:
             targetSmoothness = smoothness;
         }
     }
+
+    // 点光源的管理
+    void addPointLight(const glm::vec3& position, const glm::vec3& color, float intensity, float radius) {
+        if (pointLights.size() < MAX_POINT_LIGHTS) {
+            pointLights.push_back({ position, color, intensity, radius });
+        }
+        else {
+            std::cerr << "Max point lights reached!" << std::endl;
+        }
+    }
+
+    void clearPointLights() { pointLights.clear(); }
+
+
 
     // Fog Settings Getter 和 Setter
     const FogSettings& getFogSettings() const { return fogSettings; }
