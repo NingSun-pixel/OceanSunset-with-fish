@@ -11,5 +11,6 @@ Rebuilding the physically based rendering pipeline in OpenGL.
 Two Light Setting
 <img width="1452" alt="1398f4a6960ef04e486e4e90d1b614b" src="https://github.com/user-attachments/assets/245af733-2b17-4f04-95e0-070208743ce4" />
 <img width="1452" alt="2abeae014b65d5b7b172fa5eeaf1031" src="https://github.com/user-attachments/assets/f65ef1fe-a546-4d94-8dcd-91bffd1660a8" />
-https://www.youtube.com/watch?v=exLkjUEiQ4Q
 
+More details:
+https://www.youtube.com/watch?v=exLkjUEiQ4Q
