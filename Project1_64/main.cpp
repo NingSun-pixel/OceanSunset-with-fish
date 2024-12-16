@@ -12,7 +12,7 @@
 
 FishSimulation* fishSimulation;
 
-Camera camera(glm::vec3(44.43f, 23.0f, -64.06f), glm::vec3(0.0f, 1.0f, 0.0f), 127.3f, -8.7f, 45.0f);
+Camera camera(glm::vec3(67.4356f, 30.831f, 14.8224f), glm::vec3(0.0f, 1.0f, 0.0f), -167.5f, -17.5f, 45.0f);
 float lastFrame = 0.0f;
 
 // 定义骨骼结构
@@ -353,9 +353,9 @@ std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
 
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    std::cout <<"camera.position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
-    std::cout << "camera.front:"<< camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
-    std::cout << " camera.up:" << camera.up.x << " " << camera.up.y << " " << camera.up.z << endl;
+    //std::cout <<"camera.position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
+    //std::cout << "camera.front:"<< camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
+    //std::cout << " camera.up:" << camera.up.x << " " << camera.up.y << " " << camera.up.z << endl;
 
     // 更新光照参数
     // 获取相机的视图和投影矩阵
@@ -411,7 +411,7 @@ void renderScene() {
             pointLightColors[i] = pointLights[i].color;
             pointLightIntensities[i] = pointLights[i].intensity;
             pointLightRadii[i] = pointLights[i].radius;
-        }
+        } 
 
         // 传递点光源参数给着色器
         glUniform3fv(pointLightPositionsLoc, numPointLights, glm::value_ptr(pointLightPositions[0]));

@@ -201,7 +201,7 @@ void main()
     // 焦散效果
     float voronoiDistance;
     float voronoiCell;
-    float animatedAngleOffset = uTime; // 动态角度偏移
+    float animatedAngleOffset = uTime; // move
     calculateVoronoi(FragPos.xy * 0.05, animatedAngleOffset, 5.0, voronoiDistance, voronoiCell);
     float gray = (lightColor.r + lightColor.g + lightColor.b) / 3; 
     vec3 grayColor = vec3(gray, gray, gray);
