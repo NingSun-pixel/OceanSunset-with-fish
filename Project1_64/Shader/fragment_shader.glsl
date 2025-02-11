@@ -106,7 +106,7 @@ void main()
     kD *= 1.0 - metallic;
 
     // Lambertian diffuse
-    float NdotL = max(dot(N, L), 0.0);
+    float NdotL = max((dot(N, L)+1.0)/2, 0.0);
     vec3 diffuse = kD * albedo / 3.14159265359;
 
     // ¼ÆËã×îÖÕÑÕÉ«

@@ -567,7 +567,7 @@ int main(int argc, char** argv) {
     glutMotionFunc(mouseMotionCallback);
     InitializeFishTail();
 
-    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_3");
+    std::vector<std::string> fbxfishFiles = getAllFBXFiles("C:/Users/555/Desktop/assignment/CG_Project_1/Anim/FBX_5");
 
     loadSeparateModels(fbxfishFiles,fishmodels);
     //// 加载模型并设置 OpenGL 缓冲区

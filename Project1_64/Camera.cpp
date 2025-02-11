@@ -14,7 +14,7 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
 }
 
 void Camera::processKeyboard(char key, float deltaTime) {
-    float velocity = 2.5f * deltaTime;
+    float velocity = 25.0f * deltaTime;
     if (key == 'w')
         position += front * velocity;
     if (key == 's')
