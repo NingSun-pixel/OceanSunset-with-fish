@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+extern float pitchAngleY;
+//extern float pitchAngleZ;
+
+
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFov)
     : position(startPosition), up(startUp), yaw(startYaw), pitch(startPitch), fov(startFov) {
     updateCameraVectors();
@@ -14,6 +18,18 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
 }
 
 void Camera::processKeyboard(char key, float deltaTime) {
+    if (key == 'Q' || key == 'q') {
+        pitchAngleY += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
+    }
+    if (key == 'e' || key == 'E') {
+        pitchAngleY -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
+    }
+    //if (key == 'Z' || key == 'z') {
+    //    pitchAngleZ += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
+    //}
+    //if (key == 'C' || key == 'c') {
+    //    pitchAngleZ -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
+    //}
     float velocity = 25.0f * deltaTime;
     if (key == 'w')
         position += front * velocity;
@@ -23,6 +39,7 @@ void Camera::processKeyboard(char key, float deltaTime) {
         position -= glm::normalize(glm::cross(front, up)) * velocity;
     if (key == 'd')
         position += glm::normalize(glm::cross(front, up)) * velocity;
+
 }
 
 void Camera::processMouseMovement(float xOffset, float yOffset) {

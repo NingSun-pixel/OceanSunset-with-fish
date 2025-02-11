@@ -38,6 +38,7 @@ void loadSingleModel(const std::string& path, Model& model) {
     std::string modelName = modelFilePath.stem().string();
 
     cout << modelName << endl;
+    model.meshName = modelName;
     bool isConstTex = false;
 
     size_t pos = modelName.find('_');

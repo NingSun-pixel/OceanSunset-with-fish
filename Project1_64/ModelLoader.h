@@ -23,6 +23,7 @@ struct Model {
     unsigned int textureID;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    string meshName;
 };
 
 void loadSingleModel(const std::string& path, Model& model);

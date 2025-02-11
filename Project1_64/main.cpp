@@ -16,6 +16,21 @@ glm::vec3 lightDirection = glm::normalize(glm::vec3(-1.0f, 1.0f, 1.0f)); // 斜向
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);  // 白色光
 float smoothness = 0.0f;  // 默认的 smooth 值
 
+// 俯仰角变量
+float pitchAngleY = 0.0f;
+float pitchAngleZ = 0.0f;
+
+
+// 处理键盘输入
+//void keyboardFunc(unsigned char key, int x, int y) {
+//    if (key == 'Q' || key == 'q') {
+//        pitchAngleY += 5.0f;  // 增加俯仰角
+//    }
+//    if (key == 'e' || key == 'E') {
+//        pitchAngleY -= 5.0f;  // 减少俯仰角
+//    }
+//    glutPostRedisplay();  // 重新渲染
+//}
 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
 float lastFrame = 0.0f;
@@ -402,15 +417,28 @@ void renderScene() {
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
 
+
         //just the tail sub animate
-        if (i == 0)
-        {
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -i * 0.5f)); // 
-            modelMatrix *= fishTailJoints[i % fishTailJoints.size()].transform; 
+        //if (i == 0)
+        //{
+        //    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -i * 0.5f)); // 
+        //    modelMatrix *= fishTailJoints[i % fishTailJoints.size()].transform; 
+        //}
+        //else {
+                // 计算俯仰旋转矩阵（所有 Mesh 共享）
+        //glm::mat4 model = glm::mat4(1.0f);
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        if (fishmodels[i].meshName == "4_Rotor_2_Body_0") {
+            float time = glutGet(GLUT_ELAPSED_TIME) / 200.0f; // 获取程序运行的时间（秒）
+            float rotationAngle = time; // 让它随着时间变化
+
+            // 2. **围绕Z轴旋转**
+            modelMatrix = glm::rotate(modelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
         }
-        else {
-            modelMatrix = glm::translate(modelMatrix, translation);
-        }
+
+        modelMatrix = glm::translate(modelMatrix, translation);
+        //}
         modelMatrix = translationMatrix * modelMatrix;
 
 
@@ -563,6 +591,7 @@ int main(int argc, char** argv) {
     mouseHandler = &mouseHandlerInstance;
     //相机点击逻辑
     glutKeyboardFunc(processNormalKeys);
+    //glutKeyboardFunc(keyboardFunc);
     glutMouseFunc(mouseButtonCallback);
     glutMotionFunc(mouseMotionCallback);
     InitializeFishTail();
