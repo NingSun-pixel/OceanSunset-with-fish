@@ -21,6 +21,8 @@ float pitchAngleY = 0.0f;
 float pitchAngleZ = 0.0f;
 float pitchAngleX = 0.0f;
 
+// **全局旋转四元数（累积旋转）**
+glm::quat rotationQuat = glm::quat(1, 0, 0, 0);
 
 
 // 处理键盘输入
@@ -429,9 +431,20 @@ void renderScene() {
         //else {
                 // 计算俯仰旋转矩阵（所有 Mesh 共享）
         //glm::mat4 model = glm::mat4(1.0f);
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        // 创建每个旋转轴的四元数
+        //glm::quat qY = glm::angleAxis(glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));  // Y 轴旋转（偏航）
+        //glm::quat qZ = glm::angleAxis(glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));  // Z 轴旋转（翻滚）
+        //glm::quat qX = glm::angleAxis(glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));  // X 轴旋转（俯仰）
+
+        // 组合旋转：四元数乘法顺序很重要（Y → Z → X）
+        //glm::quat rotation = qY * qZ * qX;
+        // 将四元数转换为 4x4 旋转矩阵
+        modelMatrix = glm::mat4_cast(rotationQuat);
+
 
 
 
@@ -483,7 +496,7 @@ void renderScene() {
 // 初始化窗口和 OpenGL 环境
 void initGL() {
     // 设置清屏颜色为黑色
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     shaderProgram_use = createShader("../Project1_64/shader/vertex_shader.glsl", "../Project1_64/shader/fragment_shader.glsl");
     skyboxShaderProgram_use = createShader("../Project1_64/shader/vertex_skybox.glsl", "../Project1_64/shader/fragment_skybox.glsl");
     faces = getAllTexFiles("C:/Users/555/Desktop/assignment/CG_Project_1/SkyBoxTexture");

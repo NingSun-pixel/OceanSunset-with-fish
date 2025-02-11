@@ -1,10 +1,10 @@
-#include "Camera.h"
+ï»¿#include "Camera.h"
 
 extern float pitchAngleY;
 extern float pitchAngleZ;
 extern float pitchAngleX;
 
-
+extern glm::quat rotationQuat;
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFov)
     : position(startPosition), up(startUp), yaw(startYaw), pitch(startPitch), fov(startFov) {
@@ -20,26 +20,10 @@ glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
 }
 
 void Camera::processKeyboard(char key, float deltaTime) {
-    if (key == 'Q' || key == 'q') {
-        pitchAngleY += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
-    }
-    if (key == 'e' || key == 'E') {
-        pitchAngleY -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
-    }
-    if (key == 'Z' || key == 'z') {
-        pitchAngleZ += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
-    }
-    if (key == 'C' || key == 'c') {
-        pitchAngleZ -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
-    }
-    if (key == '1' ) {
-        pitchAngleX += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
-    }
-    if (key == '3' ) {
-        pitchAngleX -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
-    }
     float velocity = 25.0f * deltaTime;
-    if (key == 'w'|| key == 'W')
+
+    // âœ… å…ˆå¤„ç†ä½ç§»
+    if (key == 'w' || key == 'W')
         position += front * velocity;
     if (key == 's' || key == 'S')
         position -= front * velocity;
@@ -48,7 +32,49 @@ void Camera::processKeyboard(char key, float deltaTime) {
     if (key == 'd' || key == 'D')
         position += glm::normalize(glm::cross(front, up)) * velocity;
 
+    // âœ… ç”¨ä¸€ä¸ªæ ‡å¿—ä½æ£€æµ‹æ˜¯å¦å‘ç”Ÿæ—‹è½¬
+    bool rotated = false;
+    glm::quat qRot(1, 0, 0, 0); // é»˜è®¤å•ä½å››å…ƒæ•°
+
+    // âœ… å¤„ç†æ—‹è½¬
+    if (key == 'Q' || key == 'q') {
+        pitchAngleY += 5.0f;
+        qRot = glm::angleAxis(glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotated = true;
+    }
+    if (key == 'E' || key == 'e') {
+        pitchAngleY -= 5.0f;
+        qRot = glm::angleAxis(glm::radians(-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotated = true;
+    }
+    if (key == 'Z' || key == 'z') {
+        pitchAngleZ += 5.0f;
+        qRot = glm::angleAxis(glm::radians(5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        rotated = true;
+    }
+    if (key == 'C' || key == 'c') {
+        pitchAngleZ -= 5.0f;
+        qRot = glm::angleAxis(glm::radians(-5.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        rotated = true;
+    }
+    if (key == '1') {
+        pitchAngleX += 5.0f;
+        qRot = glm::angleAxis(glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        rotated = true;
+    }
+    if (key == '3') {
+        pitchAngleX -= 5.0f;
+        qRot = glm::angleAxis(glm::radians(-5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        rotated = true;
+    }
+
+    // âœ… åªæœ‰åœ¨æ—‹è½¬æŒ‰é”®è¢«æŒ‰ä¸‹æ—¶æ‰æ›´æ–°å››å…ƒæ•°
+    if (rotated) {
+        rotationQuat = qRot * rotationQuat;
+        rotationQuat = glm::normalize(rotationQuat);  // å½’ä¸€åŒ–ï¼Œé˜²æ­¢æ•°å€¼æ¼‚ç§»
+    }
 }
+
 
 void Camera::processMouseMovement(float xOffset, float yOffset) {
     yaw += xOffset * 0.1f;
