@@ -2,6 +2,8 @@
 
 extern float pitchAngleY;
 extern float pitchAngleZ;
+extern float pitchAngleX;
+
 
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFov)
@@ -14,7 +16,7 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 glm::mat4 Camera::getProjectionMatrix(float aspectRatio) const {
-    return glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+    return glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 1000.0f);
 }
 
 void Camera::processKeyboard(char key, float deltaTime) {
@@ -29,6 +31,12 @@ void Camera::processKeyboard(char key, float deltaTime) {
     }
     if (key == 'C' || key == 'c') {
         pitchAngleZ -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
+    }
+    if (key == '1' ) {
+        pitchAngleX += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
+    }
+    if (key == '3' ) {
+        pitchAngleX -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
     }
     float velocity = 25.0f * deltaTime;
     if (key == 'w'|| key == 'W')

@@ -19,6 +19,8 @@ float smoothness = 0.0f;  // 默认的 smooth 值
 // 俯仰角变量
 float pitchAngleY = 0.0f;
 float pitchAngleZ = 0.0f;
+float pitchAngleX = 0.0f;
+
 
 
 // 处理键盘输入
@@ -429,6 +431,8 @@ void renderScene() {
         //glm::mat4 model = glm::mat4(1.0f);
         modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+
 
 
         if (fishmodels[i].meshName == "4_Rotor_2_Body_0") {
