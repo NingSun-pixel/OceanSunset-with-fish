@@ -428,6 +428,8 @@ void renderScene() {
                 // 计算俯仰旋转矩阵（所有 Mesh 共享）
         //glm::mat4 model = glm::mat4(1.0f);
         modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+
 
         if (fishmodels[i].meshName == "4_Rotor_2_Body_0") {
             float time = glutGet(GLUT_ELAPSED_TIME) / 200.0f; // 获取程序运行的时间（秒）

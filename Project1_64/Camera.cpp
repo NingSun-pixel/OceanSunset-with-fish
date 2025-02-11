@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 extern float pitchAngleY;
-//extern float pitchAngleZ;
+extern float pitchAngleZ;
 
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFov)
@@ -24,20 +24,20 @@ void Camera::processKeyboard(char key, float deltaTime) {
     if (key == 'e' || key == 'E') {
         pitchAngleY -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
     }
-    //if (key == 'Z' || key == 'z') {
-    //    pitchAngleZ += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
-    //}
-    //if (key == 'C' || key == 'c') {
-    //    pitchAngleZ -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
-    //}
+    if (key == 'Z' || key == 'z') {
+        pitchAngleZ += 5.0f;  // Ôö¼Ó¸©Ñö½Ç
+    }
+    if (key == 'C' || key == 'c') {
+        pitchAngleZ -= 5.0f;  // ¼õÉÙ¸©Ñö½Ç
+    }
     float velocity = 25.0f * deltaTime;
-    if (key == 'w')
+    if (key == 'w'|| key == 'W')
         position += front * velocity;
-    if (key == 's')
+    if (key == 's' || key == 'S')
         position -= front * velocity;
-    if (key == 'a')
+    if (key == 'a' || key == 'A')
         position -= glm::normalize(glm::cross(front, up)) * velocity;
-    if (key == 'd')
+    if (key == 'd' || key == 'D')
         position += glm::normalize(glm::cross(front, up)) * velocity;
 
 }
