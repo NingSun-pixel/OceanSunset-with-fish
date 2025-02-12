@@ -81,7 +81,6 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 void main()
 {
-    // 获取材质属性
     vec3 albedo = texture(albedoMap, TexCoords).rgb;
     vec3 N = Normal;// calculateNormal();
     vec3 V = normalize(viewPos - FragPos);

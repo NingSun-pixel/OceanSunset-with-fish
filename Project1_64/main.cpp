@@ -23,6 +23,9 @@ float pitchAngleX = 0.0f;
 
 // **全局旋转四元数（累积旋转）**
 glm::quat rotationQuat = glm::quat(1, 0, 0, 0);
+glm::vec3 startPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 front = glm::vec3(0.0f,1.0f, 0.0f);
+
 
 
 // 处理键盘输入
@@ -36,7 +39,7 @@ glm::quat rotationQuat = glm::quat(1, 0, 0, 0);
 //    glutPostRedisplay();  // 重新渲染
 //}
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 45.0f);
+Camera camera(startPosition, front, -90.0f, 0.0f, 45.0f);
 float lastFrame = 0.0f;
 
 // 定义骨骼结构
@@ -372,6 +375,9 @@ std::vector<std::string> getAllTexFiles(const std::string& folderPath) {
 }
 
 void renderScene() {
+    std::cout << "position:" << camera.position.x << " " << camera.position.y << " " << camera.position.z << endl;
+    std::cout << "front:" << camera.front.x << " " << camera.front.y << " " << camera.front.z << endl;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // 获取相机的视图和投影矩阵
     // 获取当前时间（秒）
@@ -430,10 +436,13 @@ void renderScene() {
         //}
         //else {
                 // 计算俯仰旋转矩阵（所有 Mesh 共享）
-        //glm::mat4 model = glm::mat4(1.0f);
-        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
-        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
-        //modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 model = glm::mat4(1.0f);
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(pitchAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        modelMatrix = glm::mat4_cast(rotationQuat);
+
 
         // 创建每个旋转轴的四元数
         //glm::quat qY = glm::angleAxis(glm::radians(pitchAngleY), glm::vec3(0.0f, 1.0f, 0.0f));  // Y 轴旋转（偏航）
@@ -443,16 +452,11 @@ void renderScene() {
         // 组合旋转：四元数乘法顺序很重要（Y → Z → X）
         //glm::quat rotation = qY * qZ * qX;
         // 将四元数转换为 4x4 旋转矩阵
-        modelMatrix = glm::mat4_cast(rotationQuat);
-
-
-
 
         if (fishmodels[i].meshName == "4_Rotor_2_Body_0") {
-            float time = glutGet(GLUT_ELAPSED_TIME) / 200.0f; // 获取程序运行的时间（秒）
-            float rotationAngle = time; // 让它随着时间变化
+            float time = glutGet(GLUT_ELAPSED_TIME) / 200.0f; 
+            float rotationAngle = time; 
 
-            // 2. **围绕Z轴旋转**
             modelMatrix = glm::rotate(modelMatrix, rotationAngle, glm::vec3(0.0f, 0.0f, 1.0f));
         }
 

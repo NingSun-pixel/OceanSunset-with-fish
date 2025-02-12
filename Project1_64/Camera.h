@@ -12,9 +12,10 @@ public:
     glm::mat4 getProjectionMatrix(float aspectRatio) const;
     void processKeyboard(char key, float deltaTime);
     void processMouseMovement(float xOffset, float yOffset);
+    glm::vec3 position, front;
 private:
     void updateCameraVectors();
-    glm::vec3 position, front, up;
+    glm::vec3 up;
     float yaw, pitch, fov;
 };
 
