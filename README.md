@@ -43,7 +43,6 @@ The project demonstrates real-time rendering, environment lighting, and GPU inst
   - Efficient shader management  
 
 ---
----
 
 ## 🎨 Additional Work  
 
