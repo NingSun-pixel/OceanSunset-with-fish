@@ -1,5 +1,3 @@
-#🌅 OceanSunset-with-fish
-
 # 🌅 Ocean Sunset with Fish  
 
 A graphics demo project showcasing an **ocean sunset scene** with **animated fish swimming** in a physically based rendering (PBR) pipeline built using **OpenGL**.  
