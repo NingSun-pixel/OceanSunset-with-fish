@@ -16,14 +16,12 @@ The project demonstrates real-time rendering, environment lighting, and GPU inst
 
 > “A calm ocean at sunset, with fish moving gracefully — a demo of light, water, and life in real-time graphics.”  
 
----
  
 
 ## 📺 Demo Video  
 
 - ▶️ [Ocean Sunset with Fish – Showcase](https://www.youtube.com/watch?v=exLkjUEiQ4Q)  
 
----
 ## 🧩 Core Features  
 
 - **PBR Rendering Pipeline in OpenGL**  
@@ -42,7 +40,6 @@ The project demonstrates real-time rendering, environment lighting, and GPU inst
   - GPU instancing for fish groups  
   - Efficient shader management  
 
----
 
 ## 🎨 Additional Work  
 
@@ -51,7 +48,6 @@ I modeled the fish and environment assets in **Blender**, and also wrote a **Pyt
 
 <img width="1453" alt="Blender Modeling" src="https://github.com/user-attachments/assets/4613372a-b2cd-4a11-a3c6-f94b6241a4f8">
 
----
 
 ### 🐟 GPU Instancing for Fish  
 To efficiently render multiple fish, I used **GPU instancing**, which allows hundreds of fish to swim in the scene without a heavy performance cost.  
@@ -59,7 +55,6 @@ To efficiently render multiple fish, I used **GPU instancing**, which allows hun
 ![GPUInstancing1](https://github.com/user-attachments/assets/6be7ce7d-42d6-41cf-bb06-e7b5aa9a7610)  
 ![GPUInstancing2](https://github.com/user-attachments/assets/e74dba6a-6110-444d-ad13-343f2987705d)  
 
----
 
 ### 💡 Two Lighting Setups  
 I experimented with **two different lighting settings** to achieve distinct moods for the ocean sunset scene.  
