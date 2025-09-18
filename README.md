@@ -58,6 +58,8 @@ To efficiently render multiple fish, I used **GPU instancing**, which allows hun
 
 ### 💡 Two Lighting Setups  
 I experimented with **two different lighting settings** to achieve distinct moods for the ocean sunset scene.  
+  - Pointlight
+  - Directional light
 
 <img width="1452" alt="Lighting1" src="https://github.com/user-attachments/assets/f65ef1fe-a546-4d94-8dcd-91bffd1660a8" />  
 <img width="1452" alt="Lighting2" src="https://github.com/user-attachments/assets/245af733-2b17-4f04-95e0-070208743ce4" />  
